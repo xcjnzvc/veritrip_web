@@ -2,10 +2,12 @@
 import Header from "@/components/Header";
 import SearchKeywordTag from "./_components/SearchKeywordTag";
 import SearchBar from "./_components/SearchBar";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function MainPageContent() {
-  const isLoggedIn = false;
-  const userName = "test";
+  const { accessToken, user } = useAuthStore();
+  const isLoggedIn = !!accessToken; // accessToken 있으면 true, null이면 false
+  const userName = user?.name || "";
 
   const tagKeyWords = [
     "실시간 핫플레이스",
@@ -24,9 +26,14 @@ export default function MainPageContent() {
       <section className="flex-1 flex flex-col items-center pt-[30vh] px-[40px] ">
         <div className="flex flex-col items-center gap-[16px] w-full">
           <h1 className="text-[28px] text-[#222]">
-            {isLoggedIn
-              ? `어서오세요 ${userName}님, 어떤 여행을 해볼까요?`
-              : "어서오세요, 어떤 여행을 해볼까요?"}
+            {isLoggedIn ? (
+              <>
+                어서오세요 <span className="font-semibold">{userName}</span>
+                님, 어떤 여행을 해볼까요?
+              </>
+            ) : (
+              "어서오세요, 어떤 여행을 해볼까요?"
+            )}
           </h1>
           <SearchBar />
           {isLoggedIn ? (

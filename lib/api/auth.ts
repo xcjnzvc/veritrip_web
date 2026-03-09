@@ -13,3 +13,13 @@ export const loginUser = async (loginId: string, password: string) => {
     throw error;
   }
 };
+
+export const userInfo = async () => {
+  try {
+    const response = await axiosInstance.get("/users/me");
+    console.log("userinfo", response);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

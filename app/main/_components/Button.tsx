@@ -12,15 +12,23 @@ interface ButtonProps {
   color: string;
   route?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }
 
-export default function Button({ text, color, route, onClick }: ButtonProps) {
+export default function Button({
+  text,
+  color,
+  route,
+  onClick,
+  disabled,
+}: ButtonProps) {
   const selectedStyle = bgStyles[color] || "bg-gray-200 text-white";
 
   return (
     <div
-      className={`${selectedStyle} relative flex items-center justify-center px-4 py-3 rounded-lg cursor-pointer transition-opacity hover:opacity-90 w-full shadow-sm`}
-      onClick={onClick}
+      className={`${selectedStyle} relative flex items-center justify-center px-4 py-3 rounded-lg transition-opacity hover:opacity-90 w-full shadow-sm
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      onClick={disabled ? undefined : onClick}
     >
       {route && (
         <Image
@@ -31,7 +39,6 @@ export default function Button({ text, color, route, onClick }: ButtonProps) {
           className="absolute left-4"
         />
       )}
-
       <p className="font-semibold text-[14px]">
         {color === "로그인" ? text : `${text}로 계속하기`}
       </p>

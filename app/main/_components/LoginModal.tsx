@@ -6,21 +6,47 @@ import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
-import { loginUser } from "@/lib/api/auth";
+import { loginUser, userInfo } from "@/lib/api/auth";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
+  const { setLogin, setUserInfo } = useAuthStore();
+  const router = useRouter();
+
   // 체크박스 상태 관리
   const [isRemember, setIsRemember] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleLogin = async () => {
-    console.log("클릭눌림");
     try {
+      setIsLoading(true);
       const result = await loginUser(email, password);
-      console.log("로그인 성공", result);
+
+      if (result.code === 200) {
+        // 1. 일단 토큰부터 저장! (헤더에 토큰을 실기 위함)
+        setLogin(result.data.accessToken);
+
+        // 2. 이제 헤더에 토큰이 있으니 안심하고 유저 정보 호출
+        const userRes = await userInfo();
+
+        console.log("userRes", userRes);
+
+        // 3. 이미 저장된 토큰은 건드리지 않고, 유저 정보만 스토어에 추가 저장
+        setUserInfo(userRes.data);
+
+        toast.success("로그인이 완료되었습니다!");
+        router.push("/main");
+        onClose();
+      }
     } catch (error) {
-      console.log(error);
+      toast.error("로그인 정보를 확인해주세요.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,7 +91,12 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button text="로그인" color="로그인" onClick={handleLogin} />
+            <Button
+              text={isLoading ? "연결 중..." : "로그인"}
+              color="로그인"
+              onClick={handleLogin}
+              disabled={isLoading}
+            />
 
             <div className="flex justify-between items-center px-1">
               {/* 아이디 저장 체크박스 */}

@@ -1,0 +1,12 @@
+export default function LoadingSpinner({
+  text = "로딩 중...",
+}: {
+  text?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2">
+      <div className="w-6 h-6 border-2 border-[#5E0E8C] border-t-transparent rounded-full animate-spin" />
+      <p className="text-[14px] text-[#999]">{text}</p>
+    </div>
+  );
+}

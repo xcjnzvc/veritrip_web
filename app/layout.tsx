@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local"; // localFont 임포트
+import localFont from "next/font/local";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
+import { Toaster } from "react-hot-toast";
 
-// 프리텐다드 폰트 설정 (public/fonts 폴더의 파일들 연결)
 const pretendard = localFont({
   src: [
     { path: "../public/fonts/Pretendard-Thin.otf", weight: "100" },
@@ -18,10 +19,9 @@ const pretendard = localFont({
   variable: "--font-pretendard",
 });
 
-// 메타데이터 설정: 여기서 프로젝트의 정체성을 정의합니다.
 export const metadata: Metadata = {
-  title: "VERITRIP", // 브라우저 탭 제목
-  description: "VERITRIP에 대한 소개", // 검색 결과 등에 노출되는 설명
+  title: "VERITRIP",
+  description: "VERITRIP에 대한 소개",
 };
 
 export default function RootLayout({
@@ -31,9 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      {" "}
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
-        {children}
+        <AuthProvider> {children}</AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>
   );

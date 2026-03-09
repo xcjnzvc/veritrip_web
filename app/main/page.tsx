@@ -21,7 +21,7 @@ export default function MainPageContent() {
         2. 20vh는 화면 높이의 20%만큼 위에서 띄운다는 뜻이라, 
            완전 중앙보다 살짝 위에 위치하게 되어 시각적으로 더 안정적입니다.
       */}
-      <section className="flex-1 flex flex-col items-center pt-[30vh] px-[40px] border-2 border-blue-500 border-solid">
+      <section className="flex-1 flex flex-col items-center pt-[30vh] px-[40px] ">
         <div className="flex flex-col items-center gap-[16px] w-full">
           <h1 className="text-[28px] text-[#222]">
             {isLoggedIn

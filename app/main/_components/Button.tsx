@@ -10,15 +10,17 @@ const bgStyles: Record<string, string> = {
 interface ButtonProps {
   text: string;
   color: string;
-  route?: string; // 1. 이미지가 없을 수도 있으니 '?'를 붙여 선택 사항으로 만듭니다.
+  route?: string;
+  onClick?: () => void;
 }
 
-export default function Button({ text, color, route }: ButtonProps) {
+export default function Button({ text, color, route, onClick }: ButtonProps) {
   const selectedStyle = bgStyles[color] || "bg-gray-200 text-white";
 
   return (
     <div
       className={`${selectedStyle} relative flex items-center justify-center px-4 py-3 rounded-lg cursor-pointer transition-opacity hover:opacity-90 w-full shadow-sm`}
+      onClick={onClick}
     >
       {route && (
         <Image

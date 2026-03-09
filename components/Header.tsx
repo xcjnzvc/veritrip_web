@@ -6,7 +6,7 @@ export default function Header() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="border-2 border-solid border-red-500 px-[40px] py-[8px] flex justify-between items-center">
+    <div className="px-[40px] py-[8px] flex justify-between items-center">
       <div className="font-bold text-[16px] text-[#666666]">VERITRIP</div>
       <div className="flex items-center gap-[14px]">
         <Image

@@ -6,10 +6,23 @@ import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
+import { loginUser } from "@/lib/api/auth";
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
   // 체크박스 상태 관리
   const [isRemember, setIsRemember] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    console.log("클릭눌림");
+    try {
+      const result = await loginUser(email, password);
+      console.log("로그인 성공", result);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div
@@ -41,9 +54,18 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
           {/* 입력 및 로그인 섹션 */}
           <div className="flex flex-col gap-[14px] w-full">
-            <LoginInput placeholder="아이디" />
-            <LoginInput placeholder="비밀번호" type="password" />
-            <Button text="로그인" color="로그인" />
+            <LoginInput
+              placeholder="아이디"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <LoginInput
+              placeholder="비밀번호"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button text="로그인" color="로그인" onClick={handleLogin} />
 
             <div className="flex justify-between items-center px-1">
               {/* 아이디 저장 체크박스 */}

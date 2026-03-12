@@ -2,7 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import { AdminTitle } from "../../components/title";
-import { FieldWrapper, AdminInput, AdminTextarea } from "../components/FormControls";
+import AdminInput from "../components/AdminInput";
+import AdminTextarea from "../components/AdminTextarea";
 import { useCreateAgentMutation } from "@/lib/queries/agent";
 import { AgentCreateDto } from "@/lib/api/agent";
 import { useRouter } from "next/navigation";
@@ -39,66 +40,62 @@ export default function AgentCreatePage() {
 
     return (
         <div className="space-y-6 max-w-3xl">
-            <AdminTitle>에이전트 생성</AdminTitle>
+      <AdminTitle>에이전트 생성</AdminTitle>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <FieldWrapper label="에이전트 이름" required>
-                    <AdminInput
-                        placeholder="에이전트 이름을 입력하세요"
-                        value={form.name}
-                        onChange={handleChange("name")}
-                        required
-                    />
-                </FieldWrapper>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <AdminInput
+          label="에이전트 이름"
+          placeholder="에이전트 이름을 입력하세요"
+          value={form.name}
+          onChange={handleChange("name")}
+          required
+        />
 
-                <FieldWrapper label="설명" required>
-                    <AdminTextarea
-                        placeholder="에이전트에 대한 설명을 입력하세요"
-                        value={form.description}
-                        onChange={handleChange("description")}
-                        required
-                    />
-                </FieldWrapper>
+        <AdminTextarea
+          label="설명"
+          placeholder="에이전트에 대한 설명을 입력하세요"
+          value={form.description}
+          onChange={handleChange("description")}
+          required
+        />
 
-                <FieldWrapper label="Role Prompt" required>
-                    <AdminTextarea
-                        placeholder="에이전트의 역할을 설명하는 시스템 프롬프트"
-                        value={form.rolePrompt}
-                        onChange={handleChange("rolePrompt")}
-                        required
-                    />
-                </FieldWrapper>
+        <AdminTextarea
+          label="Role Prompt"
+          placeholder="에이전트의 역할을 설명하는 시스템 프롬프트"
+          value={form.rolePrompt}
+          onChange={handleChange("rolePrompt")}
+          required
+        />
 
-                <FieldWrapper label="Task Prompt" required>
-                    <AdminTextarea
-                        placeholder="에이전트가 수행해야 할 작업에 대한 프롬프트"
-                        value={form.taskPrompt}
-                        onChange={handleChange("taskPrompt")}
-                        required
-                    />
-                </FieldWrapper>
+        <AdminTextarea
+          label="Task Prompt"
+          placeholder="에이전트가 수행해야 할 작업에 대한 프롬프트"
+          value={form.taskPrompt}
+          onChange={handleChange("taskPrompt")}
+          required
+        />
 
-                <FieldWrapper label="Output Prompt" required>
-                    <AdminTextarea
-                        placeholder="에이전트 출력 형식을 정의하는 프롬프트"
-                        value={form.outputPrompt}
-                        onChange={handleChange("outputPrompt")}
-                        required
-                    />
-                </FieldWrapper>
+        <AdminTextarea
+          label="Output Prompt"
+          placeholder="에이전트 출력 형식을 정의하는 프롬프트"
+          value={form.outputPrompt}
+          onChange={handleChange("outputPrompt")}
+          required
+        />
 
-                <FieldWrapper label="Provider" required>
-                    <AdminInput value={form.provider} readOnly />
-                </FieldWrapper>
+        <AdminInput
+          label="Provider"
+          value={form.provider}
+          readOnly
+        />
 
-                <FieldWrapper label="Model ID" required>
-                    <AdminInput
-                        placeholder="사용할 모델 ID를 입력하세요"
-                        value={form.modelId}
-                        onChange={handleChange("modelId")}
-                        required
-                    />
-                </FieldWrapper>
+        <AdminInput
+          label="Model ID"
+          placeholder="사용할 모델 ID를 입력하세요"
+          value={form.modelId}
+          onChange={handleChange("modelId")}
+          required
+        />
 
                 <div className="flex justify-end gap-2 pt-4">
                     <button

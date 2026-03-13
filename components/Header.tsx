@@ -36,6 +36,14 @@ export default function Header() {
             </button>
 
             {/* UserInfoBox는 여기서 absolute여야 헤더 높이에 영향을 주지 않습니다 */}
+            {userInfo && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setUserInfo(false)}
+              />
+            )}
+
+            {/* UserInfoBox는 오버레이보다 위 z-50 */}
             {userInfo && <UserInfoBox onClose={() => setUserInfo(false)} />}
           </div>
         ) : (
@@ -48,7 +56,6 @@ export default function Header() {
         )}
       </div>
       {isModalOpen && <LoginModal onClose={() => setIsModalOpen(false)} />}
-      {/* {userInfo && <UserInfoBox onClose={() => setUserInfo(false)} />} */}
     </div>
   );
 }

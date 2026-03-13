@@ -3,11 +3,26 @@ import Header from "@/components/Header";
 import SearchKeywordTag from "./_components/SearchKeywordTag";
 import SearchBar from "./_components/SearchBar";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useState } from "react";
+import AccessModal from "./_components/AccessModal";
+import { useRouter } from "next/navigation";
+import LoginModal from "./_components/LoginModal";
 
 export default function MainPageContent() {
+  const router = useRouter();
   const { accessToken, user } = useAuthStore();
   const isLoggedIn = !!accessToken; // accessToken 있으면 true, null이면 false
   const userName = user?.name || "";
+  const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const handleSearchClick = () => {
+    if (!isLoggedIn) {
+      // 로그인 안 되어 있으면 모달 오픈
+      setIsAccessModalOpen(true);
+    }
+    // 로그인 되어 있으면 아무 처리 안 함 (기본 input 기능 동작)
+  };
 
   const tagKeyWords = [
     "실시간 핫플레이스",
@@ -35,7 +50,9 @@ export default function MainPageContent() {
               "어서오세요, 어떤 여행을 해볼까요?"
             )}
           </h1>
-          <SearchBar />
+
+          <SearchBar onClick={handleSearchClick} readOnly={!isLoggedIn} />
+
           {isLoggedIn ? (
             <div className="flex gap-5">
               {tagKeyWords.map((keyword, index) => (
@@ -56,6 +73,18 @@ export default function MainPageContent() {
           )}
         </div>
       </section>
+      {isAccessModalOpen && (
+        <AccessModal
+          onClose={() => setIsAccessModalOpen(false)}
+          onLoginClick={() => setIsLoginModalOpen(true)} // 여기서 로그인 모달을 켭니다
+          onQuickPlanClick={() => router.push("/survey")} // 질문 페이지로 이동
+        />
+      )}
+
+      {/* 3. 기존 로그인 모달 */}
+      {isLoginModalOpen && (
+        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
+      )}
     </main>
   );
 }

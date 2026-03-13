@@ -1,30 +1,62 @@
+import { useState } from "react";
+
 interface InputProps {
   placeholder: string;
   type?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
+  isLoginMode?: boolean;
 }
 
 export default function LoginInput({
   placeholder,
   type = "text",
-  value,
+  value = "",
   onChange,
+  className = "",
+  isLoginMode = true,
 }: InputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const isFloating = isFocused || value.length > 0;
+
   return (
-    /* 1. focus-within:border-purple-500 -> 안쪽 input이 클릭되면 테두리 색 변경
-        2. focus-within:ring-1 -> 살짝 두께감을 주고 싶을 때 추가 (선택사항)
-      */
-    <div className="w-full py-[11px] px-[20px] rounded-[10px] border border-[#ddd] bg-white transition-all focus-within:border-[#5E0E8C] 0">
+    <div
+      className={`
+        relative w-full rounded-[10px] border transition-all duration-200
+        ${
+          isLoginMode
+            ? `bg-white ${isFloating ? "border-[#5E0E8C]" : "border-[#ddd]"}`
+            : `bg-[#171717] ${isFloating ? "border-white" : "border-[#828282]"}`
+        }
+        ${className}
+      `}
+    >
+      <label
+        className={`
+          absolute left-[12px] px-[4px] pointer-events-none transition-all duration-200 ease-in-out
+          ${isLoginMode ? "bg-white" : "bg-[#171717]"}
+          ${
+            isFloating
+              ? `top-[-10px] text-[12px] ${isLoginMode ? "text-[#5E0E8C]" : "text-white"}`
+              : "top-[50%] -translate-y-1/2 text-[14px]"
+          }
+          ${!isFloating ? (isLoginMode ? "text-[#999]" : "text-[#828282]") : ""}
+        `}
+      >
+        {placeholder}
+      </label>
+
       <input
         type={type}
-        placeholder={placeholder}
         value={value}
         onChange={onChange}
-        /* 3. focus:outline-none -> 클릭 시 나타나는 파란색 테두리 완전 제거 
-            4. w-full -> input 영역을 전체로 넓혀서 어디를 눌러도 입력되게 함
-          */
-        className="w-full text-[14px] placeholder:text-[#999] focus:outline-none bg-transparent"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        className={`
+          w-full py-[14px] px-[16px] text-[14px] focus:outline-none bg-transparent
+          ${isLoginMode ? "text-black" : "text-white"}
+        `}
       />
     </div>
   );

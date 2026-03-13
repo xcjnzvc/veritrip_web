@@ -1,45 +1,54 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 import { AdminTitle } from "../../components/title";
 import AdminInput from "../components/AdminInput";
 import AdminTextarea from "../components/AdminTextarea";
-import { useCreateAgentMutation } from "@/lib/queries/agent";
 import { AgentCreateDto } from "@/lib/api/agent";
-import { useRouter } from "next/navigation";
+import { useCreate, useNavigation } from "@refinedev/core";
 
 export default function AgentCreatePage() {
-    const router = useRouter();
-    const createMutation = useCreateAgentMutation();
+  const { list } = useNavigation();
+  const { mutate, mutation } = useCreate();
 
-    const [form, setForm] = useState<AgentCreateDto>({
-        name: "",
-        description: "",
-        rolePrompt: "",
-        taskPrompt: "",
-        outputPrompt: "",
-        provider: "GEMINAI",
-        modelId: "",
-    });
+  const [form, setForm] = useState<AgentCreateDto>({
+    name: "",
+    description: "",
+    rolePrompt: "",
+    taskPrompt: "",
+    outputPrompt: "",
+    provider: "XAI",
+    modelId: "",
+  });
 
-    const handleChange =
-        (field: keyof AgentCreateDto) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            setForm((prev) => ({
-                ...prev,
-                [field]: e.target.value,
-            }));
-        };
-
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        await createMutation.mutateAsync(form);
-        router.push("/admin/agent");
+  const handleChange =
+    (field: keyof AgentCreateDto) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
     };
 
-    const isSubmitting = createMutation.isPending;
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    return (
-        <div className="space-y-6 max-w-3xl">
+    mutate(
+      {
+        resource: "agents",
+        values: form,
+      },
+      {
+        onSuccess: () => {
+          list("agents");
+        },
+      },
+    );
+  };
+
+  const isSubmitting = mutation.isPending;
+
+  return (
+    <div className="space-y-6 max-w-3xl">
       <AdminTitle>에이전트 생성</AdminTitle>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -97,24 +106,24 @@ export default function AgentCreatePage() {
           required
         />
 
-                <div className="flex justify-end gap-2 pt-4">
-                    <button
-                        type="button"
-                        className="px-4 py-2 rounded-md border border-gray-700 text-sm hover:bg-gray-800"
-                        onClick={() => router.back()}
-                        disabled={isSubmitting}
-                    >
-                        취소
-                    </button>
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-md bg-blue-600 text-sm text-white hover:bg-blue-500 disabled:opacity-60"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? "생성 중..." : "생성하기"}
-                    </button>
-                </div>
-            </form>
+        <div className="flex justify-end gap-2 pt-4">
+          <button
+            type="button"
+            className="px-4 py-2 rounded-md border border-gray-700 text-sm hover:bg-gray-800"
+            onClick={() => list("agents")}
+            disabled={isSubmitting}
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-md bg-blue-600 text-sm text-white hover:bg-blue-500 disabled:opacity-60"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "생성 중..." : "생성하기"}
+          </button>
         </div>
-    );
+      </form>
+    </div>
+  );
 }

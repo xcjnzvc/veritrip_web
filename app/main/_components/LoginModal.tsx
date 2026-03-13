@@ -52,11 +52,11 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
       onClick={onClose}
     >
       <div
-        className="relative bg-white pt-[66px] pb-[30px] px-[50px] max-w-[500px] w-full flex flex-col items-center rounded-2xl"
+        className="relative flex w-full max-w-[500px] flex-col items-center rounded-2xl bg-white px-[50px] pt-[66px] pb-[30px]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 닫기 버튼 */}
@@ -69,17 +69,17 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           onClick={onClose}
         />
 
-        <div className="flex flex-col gap-[30px] w-full items-center">
+        <div className="flex w-full flex-col items-center gap-[30px]">
           {/* 헤더 로고 섹션 */}
           <div className="text-center">
-            <h2 className="text-[26px] text-[#5E0E8C] font-bold">VERITRIP</h2>
+            <h2 className="text-[26px] font-bold text-[#5E0E8C]">VERITRIP</h2>
             <p className="text-[14px] text-[#999]">
               지금 바로 VERITRIP의 특별한 여정에 합류하세요.
             </p>
           </div>
 
           {/* 입력 및 로그인 섹션 */}
-          <div className="flex flex-col gap-[14px] w-full">
+          <div className="flex w-full flex-col gap-[14px]">
             <LoginInput
               placeholder="아이디"
               value={email}
@@ -98,7 +98,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
               disabled={isLoading}
             />
 
-            <div className="flex justify-between items-center px-1">
+            <div className="flex items-center justify-between px-1">
               {/* 아이디 저장 체크박스 */}
               <Checkbox
                 label="아이디 저장"
@@ -106,7 +106,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
                 onChange={() => setIsRemember(!isRemember)}
               />
 
-              <p className="text-[14px] text-[#999] cursor-pointer hover:underline">
+              <p className="cursor-pointer text-[14px] text-[#999] hover:underline">
                 비밀번호 찾기
               </p>
             </div>
@@ -115,17 +115,15 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           <Divider />
 
           {/* 소셜 로그인 섹션 */}
-          <div className="flex flex-col gap-[10px] w-full">
+          <div className="flex w-full flex-col gap-[10px]">
             <Button text="구글" color="구글" route="/icon/google.svg" />
             <Button text="카카오" color="카카오" route="/icon/kakao.svg" />
             <Button text="네이버" color="네이버" route="/icon/naver.svg" />
           </div>
 
           <div className="flex gap-[6px] text-[14px]">
-            <span className="text-[#999]">
-              아직 VERITRIP 회원이 아니신가요?
-            </span>
-            <p className="text-[#5E0E8C] font-bold">회원가입</p>
+            <span className="text-[#999]">아직 VERITRIP 회원이 아니신가요?</span>
+            <p className="font-bold text-[#5E0E8C]">회원가입</p>
           </div>
         </div>
       </div>

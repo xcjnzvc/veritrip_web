@@ -1,34 +1,60 @@
 "use client";
 
+import * as React from "react";
 import { cn } from "@/lib/utils";
-import { TextareaHTMLAttributes } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
-interface AdminTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface AdminTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
   error?: string;
+  helperText?: string;
 }
 
-export default function AdminTextarea({
-  label,
-  className,
-  error,
-  ...props
-}: AdminTextareaProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium text-gray-100">{label}</label>
-      <textarea
-        className={cn(
-          "px-3 py-2 rounded-md border text-sm bg-gray-900 text-gray-100",
-          "border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500",
-          "min-h-[100px] resize-y",
-          error && "border-red-500",
-          className,
-        )}
-        {...props}
-      />
-      {error && <span className="text-xs text-red-500">{error}</span>}
-    </div>
-  );
-}
+const AdminTextarea = React.forwardRef<HTMLTextAreaElement, AdminTextareaProps>(
+  ({ label, className, error, helperText, id, ...props }, ref) => {
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
 
+    return (
+      <div className="group flex w-full flex-col gap-2">
+        <Label
+          htmlFor={inputId}
+          className={cn(
+            "group-focus-within:text-primary text-sm font-semibold transition-colors",
+            error && "text-destructive",
+          )}
+        >
+          {label}
+        </Label>
+        <Textarea
+          id={inputId}
+          ref={ref}
+          className={cn(
+            "min-h-[120px] resize-none transition-all duration-200",
+            error && "border-destructive ring-destructive/20 focus-visible:ring-destructive",
+            className,
+          )}
+          aria-invalid={!!error}
+          aria-describedby={error ? errorId : undefined}
+          {...props}
+        />
+        {error ? (
+          <p
+            id={errorId}
+            className="animate-in fade-in slide-in-from-top-1 text-destructive text-xs font-medium"
+          >
+            {error}
+          </p>
+        ) : helperText ? (
+          <p className="text-muted-foreground/80 text-xs">{helperText}</p>
+        ) : null}
+      </div>
+    );
+  },
+);
+
+AdminTextarea.displayName = "AdminTextarea";
+
+export default AdminTextarea;

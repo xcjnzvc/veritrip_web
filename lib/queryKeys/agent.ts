@@ -8,4 +8,3 @@ export const agentKeys = {
   detail: (id: string) => [...agentKeys.details(), id] as const,
   run: (id: string) => [...agentKeys.all, "run", id] as const,
 };
-

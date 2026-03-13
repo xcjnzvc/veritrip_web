@@ -28,18 +28,8 @@ export default function RefineProvider({ children }: RefineProviderProps) {
     >
       <div className={cn("flex min-h-screen bg-gray-50")}>
         <AdminHeader />
-        <main
-          className={cn(
-            "flex-1",
-            "px-8 py-6",
-            "border-l",
-            "bg-white",
-          )}
-        >
-          {children}
-        </main>
+        <main className={cn("flex-1", "px-8 py-6", "border-l", "bg-white")}>{children}</main>
       </div>
     </Refine>
   );
 }
-

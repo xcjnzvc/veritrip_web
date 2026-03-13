@@ -3,10 +3,15 @@
 import { AdminTitle } from "../components/title";
 import { useAgentListQuery, useDeleteAgentMutation } from "@/lib/queries/agent";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import AgentCreateForm from "./components/AgentCreateForm";
+import { useNavigation } from "@refinedev/core";
 
 export default function AgentPage() {
   const [page, setPage] = useState(1);
   const limit = 10;
+  const [open, setOpen] = useState(false);
+  const { list } = useNavigation();
 
   const { data, isLoading, isError } = useAgentListQuery({
     page,
@@ -20,7 +25,35 @@ export default function AgentPage() {
 
   return (
     <div className="space-y-6">
-      <AdminTitle>에이전트 목록</AdminTitle>
+      <div className="flex items-center justify-between">
+        <AdminTitle>에이전트 목록</AdminTitle>
+        <Button size="sm" onClick={() => setOpen(true)}>
+          에이전트 추가하기
+        </Button>
+      </div>
+
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-full max-w-3xl rounded-lg border bg-background p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">에이전트 생성</h2>
+              <button
+                type="button"
+                className="text-muted-foreground hover:text-foreground rounded p-1"
+                onClick={() => setOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <AgentCreateForm
+              onSuccess={() => {
+                setOpen(false);
+                list("agents");
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {isLoading && <div>로딩 중...</div>}
       {isError && <div className="text-red-400">에이전트 목록 조회에 실패했습니다.</div>}
@@ -60,10 +93,10 @@ export default function AgentPage() {
                       <td className="px-4 py-2 align-middle text-gray-400">
                         {new Date(agent.createdAt).toLocaleString("ko-KR")}
                       </td>
-                      <td className="px-4 py-2 align-middle text-right">
+                      <td className="px-4 py-2 text-right align-middle">
                         <button
                           type="button"
-                          className="text-xs px-3 py-1 rounded bg-red-600 text-white hover:bg-red-500 disabled:opacity-60"
+                          className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-500 disabled:opacity-60"
                           onClick={() => deleteMutation.mutate(agent.id)}
                           disabled={deleteMutation.isPending}
                         >
@@ -85,7 +118,7 @@ export default function AgentPage() {
               <div className="space-x-2">
                 <button
                   type="button"
-                  className="px-3 py-1 rounded border border-gray-700 hover:bg-gray-800 disabled:opacity-60"
+                  className="rounded border border-gray-700 px-3 py-1 hover:bg-gray-800 disabled:opacity-60"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                 >
@@ -93,7 +126,7 @@ export default function AgentPage() {
                 </button>
                 <button
                   type="button"
-                  className="px-3 py-1 rounded border border-gray-700 hover:bg-gray-800 disabled:opacity-60"
+                  className="rounded border border-gray-700 px-3 py-1 hover:bg-gray-800 disabled:opacity-60"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={meta.totalPages !== 0 && page >= meta.totalPages}
                 >

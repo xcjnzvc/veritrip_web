@@ -4,10 +4,7 @@ import { cn } from "@/lib/utils";
 export default function NotFound() {
   return (
     <div
-      className={cn(
-        "flex min-h-screen flex-col items-center justify-center",
-        "bg-gray-50 px-4"
-      )}
+      className={cn("flex min-h-screen flex-col items-center justify-center", "bg-gray-50 px-4")}
     >
       <div className="max-w-md text-center">
         <p className="text-sm font-semibold text-blue-600">404</p>
@@ -25,7 +22,7 @@ export default function NotFound() {
               "inline-flex items-center justify-center rounded-md",
               "bg-blue-600 px-4 py-2 text-sm font-medium text-white",
               "hover:bg-blue-700",
-              "transition-colors"
+              "transition-colors",
             )}
           >
             메인으로 돌아가기
@@ -34,7 +31,7 @@ export default function NotFound() {
             href="/main"
             className={cn(
               "text-sm font-medium text-gray-700 underline-offset-4",
-              "hover:underline"
+              "hover:underline",
             )}
           >
             여행 메인 페이지 보기
@@ -44,4 +41,3 @@ export default function NotFound() {
     </div>
   );
 }
-

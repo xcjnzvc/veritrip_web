@@ -30,4 +30,3 @@ export type ApiResponseWithData<T> = {
 
 /** 리스트 응답 (data가 배열인 경우에 사용) */
 export type ListResponse<T> = ApiResponseWithData<T[]>;
-

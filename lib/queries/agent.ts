@@ -87,4 +87,3 @@ export const useRunAgentMutation = () => {
     mutationFn: ({ id, body }) => runAgent(id, body),
   });
 };
-

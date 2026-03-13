@@ -16,10 +16,6 @@ const navItems: NavItem[] = [
   {
     label: "에이전트 관리",
     href: "/admin/agent",
-    children: [
-      { label: "에이전트 목록", href: "/admin/agent" },
-      { label: "에이전트 생성", href: "/admin/agent/create" },
-    ],
   },
 ];
 
@@ -36,11 +32,11 @@ export function AdminHeader() {
         "flex flex-col",
       )}
     >
-      <div className="h-16 flex items-center px-6 border-b border-gray-800">
+      <div className="flex h-16 items-center border-b border-gray-800 px-6">
         <span className="text-lg font-semibold tracking-tight">Admin</span>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => {
           const hasChildren = item.children && item.children.length > 0;
           const isActive =
@@ -55,11 +51,9 @@ export function AdminHeader() {
               <div key={item.label} className="space-y-1">
                 <button
                   type="button"
-                  onClick={() =>
-                    setOpenParent((prev) => (prev === item.label ? null : item.label))
-                  }
+                  onClick={() => setOpenParent((prev) => (prev === item.label ? null : item.label))}
                   className={cn(
-                    "w-full flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors",
                     "hover:bg-gray-800 hover:text-white",
                     isActive && "bg-gray-800 text-white",
                   )}
@@ -69,7 +63,7 @@ export function AdminHeader() {
                 </button>
 
                 {isOpen && (
-                  <div className="ml-2 pl-2 border-l border-gray-800 space-y-1">
+                  <div className="ml-2 space-y-1 border-l border-gray-800 pl-2">
                     {item.children!.map((child) => {
                       const isChildActive = pathname === child.href;
 

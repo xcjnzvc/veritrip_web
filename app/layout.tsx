@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from "react-hot-toast";
+import Header from "@/components/Header";
 
 const pretendard = localFont({
   src: [
@@ -26,13 +27,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ko">
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
-        <AuthProvider> {children}</AuthProvider>
+        <AuthProvider>
+          <Header />
+          {children}
+        </AuthProvider>
+
         <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>

@@ -22,11 +22,9 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
   const { setLogin, setUserInfo } = useAuthStore();
   const router = useRouter();
 
-  // 현재 모달이 로그인인지 회원가입인지 상태 관리
   const [isLoginMode, setIsLoginMode] = useState(true);
-
   const [isLoading, setIsLoading] = useState(false);
-  const [name, setName] = useState(""); // 회원가입용 이름 추가
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isRemember, setIsRemember] = useState(false);
@@ -52,9 +50,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         }
 
         setLogin(result.data.accessToken);
-
         const userRes = await userInfo();
-
         setUserInfo(userRes.data);
 
         toast.success("로그인이 완료되었습니다!");
@@ -62,11 +58,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         onClose();
       }
     } catch (error: unknown) {
-      // 1. 우선 unknown으로 받습니다.
-
-      // 2. axios.isAxiosError 뒤에 <타입>을 붙여서 "이 에러의 데이터는 이 모양이야"라고 알려줍니다.
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
-        // 3. 이제 여기서 error.response?.data를 치면 code, message가 자동완성됩니다!
         const serverMessage = error.response?.data.message;
         toast.error(serverMessage || "로그인에 실패했습니다.");
       } else {
@@ -77,7 +69,6 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // 회원가입 로직 (필요시 구현)
   const handleSignUp = async () => {
     try {
       setIsLoading(true);
@@ -89,11 +80,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         setPassword("");
       }
     } catch (error: unknown) {
-      // 1. 우선 unknown으로 받습니다.
-
-      // 2. axios.isAxiosError 뒤에 <타입>을 붙여서 "이 에러의 데이터는 이 모양이야"라고 알려줍니다.
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
-        // 3. 이제 여기서 error.response?.data를 치면 code, message가 자동완성됩니다!
         const serverMessage = error.response?.data.message;
         toast.error(serverMessage || "회원가입에 실패했습니다.");
       } else {
@@ -111,17 +98,15 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     >
       <div
         className={`relative pt-[66px] pb-[30px] px-[50px] max-w-[500px] w-full flex flex-col items-center rounded-2xl transition-colors duration-300 ${
-          isLoginMode ? "bg-white" : "bg-[#1A1A1A]" // 회원가입일 때 어두운 배경
+          isLoginMode ? "bg-white" : "bg-[#1A1A1A]"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 닫기 버튼 */}
         <Image
-          src="/icon/cancel.svg" // 로그인 때 잘 나오던 그 경로 그대로 고정
+          src="/icon/cancel.svg"
           alt="cancel"
           width={20}
           height={20}
-          // 회원가입 모드일 때만 반전
           className={`absolute top-[20px] right-[20px] cursor-pointer z-[60] ${
             !isLoginMode ? "invert brightness-200" : ""
           }`}
@@ -145,7 +130,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
           {/* 입력 섹션 */}
           <div className="flex flex-col gap-[14px] w-full">
-            {!isLoginMode && ( // 회원가입 모드일 때만 이름 입력창 노출
+            {!isLoginMode && (
               <LoginInput
                 placeholder="이름"
                 value={name}
@@ -171,7 +156,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
               text={
                 isLoading ? "연결 중..." : isLoginMode ? "로그인" : "가입하기"
               }
-              color="로그인" // 보라색 버튼 색상은 그대로 유지
+              color="메인" // ✅ "로그인" → "메인"으로 변경
               onClick={isLoginMode ? handleLogin : handleSignUp}
               disabled={isLoading}
             />
@@ -195,11 +180,10 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           {/* 소셜 로그인 섹션 */}
           <div className="flex flex-col gap-[10px] w-full">
             <Button
-              text="Google로 계속하기"
+              text="Google로 계속하기" // ✅ text 그대로 출력되므로 변경 없음
               color="구글"
               route="/icon/google.svg"
             />
-            {/* 카카오, 네이버 주석 유지 */}
           </div>
 
           {/* 하단 모드 전환 섹션 */}

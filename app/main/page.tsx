@@ -33,7 +33,7 @@ export default function MainPageContent() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Header />
+      {/* <Header /> */}
       {/* 1. justify-center를 빼고 pt-[20vh]를 줬습니다.
         2. 20vh는 화면 높이의 20%만큼 위에서 띄운다는 뜻이라, 
            완전 중앙보다 살짝 위에 위치하게 되어 시각적으로 더 안정적입니다.

@@ -47,7 +47,7 @@ export default function AccessModal({
         <div className="flex flex-col gap-[10px] w-full">
           <Button
             text="로그인하고 시작하기"
-            color="로그인"
+            color="메인"
             onClick={() => {
               onClose();
               onLoginClick();

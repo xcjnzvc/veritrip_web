@@ -1,22 +1,21 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import Link from "next/link";
 import LoginModal from "@/app/main/_components/LoginModal";
 import Image from "next/image";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import UserInfoBox from "@/app/main/_components/UserInfo";
 import ProgressBar from "@/app/survey/_components/ProgressBar";
-import { useSurveyStore } from "@/store/useSurveyStore";
 
 export default function Header() {
-  const pathname = usePathname();
-  const isSurveyPage = pathname === "/survey";
   const { accessToken, user } = useAuthStore();
-  const { step, totalSteps } = useSurveyStore();
+  // const { step } = useSurveyStore();
   const isLoggedIn = !!accessToken;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(false);
+
+  // const totalSteps = surveyMockData.steps.length;
 
   const displayUserName = user?.name
     ? user.name.length > 2
@@ -27,7 +26,11 @@ export default function Header() {
   return (
     <header className="relative w-full bg-white">
       <div className="px-[40px] py-[8px] flex justify-between items-center h-[60px]">
-        <div className="font-bold text-[16px] text-[#666666]">VERITRIP</div>
+        <Link href="/">
+          <div className="font-bold text-[16px] text-[#666666] cursor-pointer">
+            VERITRIP
+          </div>
+        </Link>
         <div className="flex items-center gap-[14px]">
           <Image
             src="/icon/mode-light.svg"

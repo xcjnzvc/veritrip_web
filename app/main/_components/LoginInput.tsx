@@ -1,11 +1,25 @@
+import { useState } from "react";
+
 interface InputProps {
   placeholder: string;
   type?: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
+  isLoginMode?: boolean;
 }
 
-export default function LoginInput({ placeholder, type = "text", value, onChange }: InputProps) {
+export default function LoginInput({
+  placeholder,
+  type = "text",
+  value = "",
+  onChange,
+  className = "",
+  isLoginMode = true,
+}: InputProps) {
+  const [isFocused, setIsFocused] = useState(false);
+  const isFloating = isFocused || value.length > 0;
+
   return (
     /* 1. focus-within:border-purple-500 -> 안쪽 input이 클릭되면 테두리 색 변경
         2. focus-within:ring-1 -> 살짝 두께감을 주고 싶을 때 추가 (선택사항)
@@ -13,7 +27,6 @@ export default function LoginInput({ placeholder, type = "text", value, onChange
     <div className="0 w-full rounded-[10px] border border-[#ddd] bg-white px-[20px] py-[11px] transition-all focus-within:border-[#5E0E8C]">
       <input
         type={type}
-        placeholder={placeholder}
         value={value}
         onChange={onChange}
         /* 3. focus:outline-none -> 클릭 시 나타나는 파란색 테두리 완전 제거 

@@ -1,26 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
-import { loginUser, userInfo } from "@/lib/api/auth";
+import { loginUser, signin, userInfo } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import axios from "axios";
+
+interface ApiErrorResponse {
+  code: number;
+  message: string;
+  data: null;
+}
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
   const { setLogin, setUserInfo } = useAuthStore();
   const router = useRouter();
 
-  // 체크박스 상태 관리
-  const [isRemember, setIsRemember] = useState(false);
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isRemember, setIsRemember] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("savedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setIsRemember(true);
+    }
+  }, []);
 
   const handleLogin = async () => {
     try {
@@ -28,23 +43,49 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       const result = await loginUser(email, password);
 
       if (result.code === 200) {
-        // 1. 일단 토큰부터 저장! (헤더에 토큰을 실기 위함)
+        if (isRemember) {
+          localStorage.setItem("savedEmail", email);
+        } else {
+          localStorage.removeItem("savedEmail");
+        }
+
         setLogin(result.data.accessToken);
-
-        // 2. 이제 헤더에 토큰이 있으니 안심하고 유저 정보 호출
         const userRes = await userInfo();
-
-        console.log("userRes", userRes);
-
-        // 3. 이미 저장된 토큰은 건드리지 않고, 유저 정보만 스토어에 추가 저장
         setUserInfo(userRes.data);
 
         toast.success("로그인이 완료되었습니다!");
         router.push("/main");
         onClose();
       }
-    } catch (error) {
-      toast.error("로그인 정보를 확인해주세요.");
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        const serverMessage = error.response?.data.message;
+        toast.error(serverMessage || "로그인에 실패했습니다.");
+      } else {
+        toast.error("알 수 없는 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async () => {
+    try {
+      setIsLoading(true);
+      const result = await signin(name, email, password);
+
+      if (result.code === 200) {
+        toast.success("회원가입이 완료되었습니다!");
+        setIsLoginMode(true);
+        setPassword("");
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ApiErrorResponse>(error)) {
+        const serverMessage = error.response?.data.message;
+        toast.error(serverMessage || "회원가입에 실패했습니다.");
+      } else {
+        toast.error("알 수 없는 오류가 발생했습니다.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -56,74 +97,104 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="relative flex w-full max-w-[500px] flex-col items-center rounded-2xl bg-white px-[50px] pt-[66px] pb-[30px]"
+        className={`relative flex w-full max-w-[500px] flex-col items-center rounded-2xl px-[50px] pt-[66px] pb-[30px] transition-colors duration-300 ${
+          isLoginMode ? "bg-white" : "bg-[#1A1A1A]"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 닫기 버튼 */}
         <Image
           src="/icon/cancel.svg"
           alt="cancel"
           width={20}
           height={20}
-          className="absolute top-[20px] right-[20px] cursor-pointer"
+          className={`absolute top-[20px] right-[20px] z-[60] cursor-pointer ${
+            !isLoginMode ? "brightness-200 invert" : ""
+          }`}
           onClick={onClose}
         />
 
         <div className="flex w-full flex-col items-center gap-[30px]">
           {/* 헤더 로고 섹션 */}
           <div className="text-center">
-            <h2 className="text-[26px] font-bold text-[#5E0E8C]">VERITRIP</h2>
-            <p className="text-[14px] text-[#999]">
+            <h2
+              className={`text-[26px] font-bold ${isLoginMode ? "text-[#5E0E8C]" : "text-white"}`}
+            >
+              VERITRIP
+            </h2>
+            <p className={`text-[14px] ${isLoginMode ? "text-[#999]" : "text-[#828282]"}`}>
               지금 바로 VERITRIP의 특별한 여정에 합류하세요.
             </p>
           </div>
 
-          {/* 입력 및 로그인 섹션 */}
+          {/* 입력 섹션 */}
           <div className="flex w-full flex-col gap-[14px]">
+            {!isLoginMode && (
+              <LoginInput
+                placeholder="이름"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                isLoginMode={isLoginMode}
+              />
+            )}
             <LoginInput
-              placeholder="아이디"
+              placeholder="이메일"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              isLoginMode={isLoginMode}
             />
             <LoginInput
               placeholder="비밀번호"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              isLoginMode={isLoginMode}
             />
+
             <Button
-              text={isLoading ? "연결 중..." : "로그인"}
-              color="로그인"
-              onClick={handleLogin}
+              text={isLoading ? "연결 중..." : isLoginMode ? "로그인" : "가입하기"}
+              color="메인" // ✅ "로그인" → "메인"으로 변경
+              onClick={isLoginMode ? handleLogin : handleSignUp}
               disabled={isLoading}
             />
 
-            <div className="flex items-center justify-between px-1">
-              {/* 아이디 저장 체크박스 */}
-              <Checkbox
-                label="아이디 저장"
-                checked={isRemember}
-                onChange={() => setIsRemember(!isRemember)}
-              />
-
-              <p className="cursor-pointer text-[14px] text-[#999] hover:underline">
-                비밀번호 찾기
-              </p>
-            </div>
+            {isLoginMode && (
+              <div className="flex items-center justify-between px-1">
+                <Checkbox
+                  label="이메일 저장"
+                  checked={isRemember}
+                  onChange={() => setIsRemember(!isRemember)}
+                />
+                <p className="cursor-pointer text-[14px] text-[#999] hover:underline">
+                  비밀번호 찾기
+                </p>
+              </div>
+            )}
           </div>
 
           <Divider />
 
           {/* 소셜 로그인 섹션 */}
           <div className="flex w-full flex-col gap-[10px]">
-            <Button text="구글" color="구글" route="/icon/google.svg" />
-            <Button text="카카오" color="카카오" route="/icon/kakao.svg" />
-            <Button text="네이버" color="네이버" route="/icon/naver.svg" />
+            <Button
+              text="Google로 계속하기" // ✅ text 그대로 출력되므로 변경 없음
+              color="구글"
+              route="/icon/google.svg"
+            />
           </div>
 
+          {/* 하단 모드 전환 섹션 */}
           <div className="flex gap-[6px] text-[14px]">
-            <span className="text-[#999]">아직 VERITRIP 회원이 아니신가요?</span>
-            <p className="font-bold text-[#5E0E8C]">회원가입</p>
+            <span className={isLoginMode ? "text-[#999]" : "text-[#828282]"}>
+              {isLoginMode ? "아직 VERITRIP 회원이 아니신가요?" : "이미 VERITRIP 회원이신가요?"}
+            </span>
+            <p
+              className={`cursor-pointer font-bold hover:underline ${
+                isLoginMode ? "text-[#5E0E8C]" : "text-white"
+              }`}
+              onClick={() => setIsLoginMode(!isLoginMode)}
+            >
+              {isLoginMode ? "회원가입" : "로그인"}
+            </p>
           </div>
         </div>
       </div>

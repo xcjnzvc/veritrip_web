@@ -1,5 +1,6 @@
 import axiosInstance from "../axiosInstance";
 import { ApiResponse, ApiResponseWithData, ListResponse } from "../types/api";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // 에이전트 엔티티 (실제 응답 스펙에 맞게 정의)
 export interface Agent {
@@ -16,7 +17,7 @@ export interface Agent {
 // 목록 조회용 쿼리 파라미터 (AgentFindListDto에 맞춰 수정)
 export interface AgentListQuery {
   page?: number;
-  pageSize?: number;
+  take?: number;
   keyword?: string;
 }
 
@@ -57,7 +58,13 @@ export const createAgent = async (body: AgentCreateDto): Promise<ApiResponse> =>
 
 // 에이전트 목록 조회 (GET /agents)
 export const fetchAgents = async (params: AgentListQuery): Promise<AgentListResponse> => {
-  const response = await axiosInstance.get<AgentListResponse>("/agents", { params });
+  const accessToken = useAuthStore.getState().accessToken;
+  console.log("[fetchAgents] accessToken exists:", !!accessToken);
+  if (accessToken) {
+    console.log("[fetchAgents] accessToken preview:", `${accessToken.slice(0, 12)}...`);
+  }
+
+  const response = await axiosInstance.get<AgentListResponse>("/mgmt/agents", { params });
   return response.data;
 };
 

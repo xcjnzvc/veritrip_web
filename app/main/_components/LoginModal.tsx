@@ -6,9 +6,8 @@ import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
-import { loginUser, signin, userInfo } from "@/lib/api/auth";
+import { loginUser, refreshSession, signin } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
@@ -20,7 +19,6 @@ interface ApiErrorResponse {
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
   const { setLogin, setUserInfo } = useAuthStore();
-  const router = useRouter();
 
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,12 +47,20 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           localStorage.removeItem("savedEmail");
         }
 
-        setLogin(result.data.accessToken);
-        const userRes = await userInfo();
-        setUserInfo(userRes.data);
+        // 실무형 세션 고정: 로그인 직후 쿠키 기반 refresh로 accessToken/user를 재동기화한다.
+        try {
+          const session = await refreshSession();
+          setLogin(session.accessToken);
+          setUserInfo(session.user);
+        } catch {
+          // refresh 동기화 실패 시 로그인 응답 accessToken을 최소한으로 반영
+          if (result?.data?.accessToken) {
+            setLogin(result.data.accessToken);
+          }
+        }
 
         toast.success("로그인이 완료되었습니다!");
-        router.push("/main");
+        // router.push("/main");
         onClose();
       }
     } catch (error: unknown) {
@@ -107,7 +113,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           alt="cancel"
           width={20}
           height={20}
-          className={`absolute top-[20px] right-[20px] z-[60] cursor-pointer ${
+          className={`absolute top-[20px] right-[20px] z-60 cursor-pointer ${
             !isLoginMode ? "brightness-200 invert" : ""
           }`}
           onClick={onClose}

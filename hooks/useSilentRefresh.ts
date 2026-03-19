@@ -1,19 +1,21 @@
-import axiosInstance from "@/lib/axiosInstance";
+import { refreshSession } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect } from "react";
 
 export const useSilentRefresh = () => {
-  const { setLogin, setLogout } = useAuthStore();
+  const { setLogin, setUserInfo, setAuthReady } = useAuthStore();
 
   useEffect(() => {
     const refresh = async () => {
       try {
-        const response = await axiosInstance.post("/auth/refresh");
-        const newAccessToken = response.data.data.accessToken;
-        setLogin(newAccessToken); // accessToken만 Zustand에 저장
-        // refreshToken은 백엔드가 쿠키로 알아서 갱신해줌!
+        const session = await refreshSession();
+        setLogin(session.accessToken);
+        setUserInfo(session.user);
       } catch {
-        setLogout();
+        // 앱 초기 부트스트랩 단계에서는 refresh 실패를 정상 케이스로 간주한다.
+        // (비로그인 상태 또는 만료/미보유 쿠키) -> 강제 로그아웃으로 상태를 덮어쓰지 않음
+      } finally {
+        setAuthReady(true);
       }
     };
 

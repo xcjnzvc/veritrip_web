@@ -6,35 +6,67 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import AgentCreateForm from "./components/AgentCreateForm";
 import { useNavigation } from "@refinedev/core";
+import { Bot, ChevronLeft, ChevronRight, Plus, Search, Trash2 } from "lucide-react";
+import { adminTw } from "../components/styles";
 
 export default function AgentPage() {
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const take = 10;
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { list } = useNavigation();
 
   const { data, isLoading, isError } = useAgentListQuery({
     page,
-    pageSize: limit,
+    take,
   });
 
   const deleteMutation = useDeleteAgentMutation();
 
   const agents = data?.data ?? [];
+  const filteredAgents = agents.filter((agent) => {
+    const keyword = searchQuery.trim().toLowerCase();
+    if (!keyword) {
+      return true;
+    }
+
+    return (
+      agent.name.toLowerCase().includes(keyword) ||
+      (agent.description || "").toLowerCase().includes(keyword) ||
+      agent.modelId.toLowerCase().includes(keyword) ||
+      agent.provider.toLowerCase().includes(keyword)
+    );
+  });
   const meta = data?.meta;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className={adminTw.page}>
+      <div className={adminTw.headerBlock}>
         <AdminTitle>에이전트 목록</AdminTitle>
-        <Button size="sm" onClick={() => setOpen(true)}>
-          에이전트 추가하기
+        <p className={adminTw.subtitle}>생성한 AI 에이전트를 조회하고 관리합니다.</p>
+      </div>
+
+      <div className={adminTw.toolbar}>
+        <div className={adminTw.searchWrap}>
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="이름, 설명, 모델 검색"
+            className={adminTw.searchInput}
+          />
+        </div>
+
+        <Button size="sm" onClick={() => setOpen(true)} className="gap-2 self-start sm:self-auto">
+          <Plus className="size-4" />
+          에이전트 추가
         </Button>
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-full max-w-3xl rounded-lg border bg-background p-6 shadow-lg">
+        <div className={adminTw.modalBackdrop}>
+          <div className={adminTw.modalCard}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">에이전트 생성</h2>
               <button
@@ -60,46 +92,55 @@ export default function AgentPage() {
 
       {!isLoading && !isError && (
         <>
-          <div className="overflow-x-auto rounded-md border border-gray-800">
+          <div className={`overflow-x-auto ${adminTw.card}`}>
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-900">
+              <thead className="bg-muted/40">
                 <tr>
-                  <th className="px-4 py-2 text-left">ID</th>
-                  <th className="px-4 py-2 text-left">이름</th>
-                  <th className="px-4 py-2 text-left">설명</th>
-                  <th className="px-4 py-2 text-left">모델</th>
-                  <th className="px-4 py-2 text-left">생성일</th>
-                  <th className="px-4 py-2 text-right">액션</th>
+                  <th className={adminTw.tableHeadCell}>ID</th>
+                  <th className={adminTw.tableHeadCell}>이름</th>
+                  <th className={adminTw.tableHeadCell}>설명</th>
+                  <th className={adminTw.tableHeadCell}>모델</th>
+                  <th className={adminTw.tableHeadCell}>생성일</th>
+                  <th className={`${adminTw.tableHeadCell} text-right`}>액션</th>
                 </tr>
               </thead>
               <tbody>
-                {agents.length === 0 ? (
+                {filteredAgents.length === 0 ? (
                   <tr>
-                    <td className="px-4 py-6 text-center text-gray-400" colSpan={6}>
-                      에이전트가 없습니다.
+                    <td className={adminTw.emptyCell} colSpan={6}>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                          <Bot className="size-5 text-muted-foreground" />
+                        </div>
+                        <p>{searchQuery ? "검색 결과가 없습니다." : "에이전트가 없습니다."}</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
-                  agents.map((agent) => (
-                    <tr key={agent.id} className="border-t border-gray-800">
-                      <td className="px-4 py-2 align-middle text-gray-300">{agent.id}</td>
-                      <td className="px-4 py-2 align-middle text-gray-100">{agent.name}</td>
-                      <td className="px-4 py-2 align-middle text-gray-400">
+                  filteredAgents.map((agent) => (
+                    <tr key={agent.id} className={adminTw.tableRow}>
+                      <td className={adminTw.tableCellMono}>{agent.id}</td>
+                      <td className={adminTw.tableCellStrong}>{agent.name}</td>
+                      <td className={`${adminTw.tableCell} max-w-[260px] truncate`}>
                         {agent.description || "-"}
                       </td>
-                      <td className="px-4 py-2 align-middle text-gray-300">
-                        {agent.provider} / {agent.modelId}
+                      <td className={adminTw.tableCell}>
+                        <div className="flex items-center gap-2">
+                          <span className={adminTw.providerBadge}>{agent.provider}</span>
+                          <span className="text-xs">{agent.modelId}</span>
+                        </div>
                       </td>
-                      <td className="px-4 py-2 align-middle text-gray-400">
+                      <td className={adminTw.tableCell}>
                         {new Date(agent.createdAt).toLocaleString("ko-KR")}
                       </td>
-                      <td className="px-4 py-2 text-right align-middle">
+                      <td className="px-4 py-3 text-right align-middle">
                         <button
                           type="button"
-                          className="rounded bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-500 disabled:opacity-60"
+                          className={adminTw.dangerButton}
                           onClick={() => deleteMutation.mutate(agent.id)}
                           disabled={deleteMutation.isPending}
                         >
+                          <Trash2 className="size-3.5" />
                           삭제
                         </button>
                       </td>
@@ -111,26 +152,26 @@ export default function AgentPage() {
           </div>
 
           {meta && (
-            <div className="flex items-center justify-between text-xs text-gray-400">
+            <div className={adminTw.paginationWrap}>
               <span>
                 총 {meta.totalCount}개 / {meta.page} / {meta.totalPages} 페이지
               </span>
-              <div className="space-x-2">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  className="rounded border border-gray-700 px-3 py-1 hover:bg-gray-800 disabled:opacity-60"
+                  className={adminTw.iconButton}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page <= 1}
                 >
-                  이전
+                  <ChevronLeft className="size-4" />
                 </button>
                 <button
                   type="button"
-                  className="rounded border border-gray-700 px-3 py-1 hover:bg-gray-800 disabled:opacity-60"
+                  className={adminTw.iconButton}
                   onClick={() => setPage((p) => p + 1)}
                   disabled={meta.totalPages !== 0 && page >= meta.totalPages}
                 >
-                  다음
+                  <ChevronRight className="size-4" />
                 </button>
               </div>
             </div>

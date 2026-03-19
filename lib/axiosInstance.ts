@@ -24,6 +24,13 @@ axiosInstance.interceptors.response.use(
   (response) => response, // 성공은 그냥 통과
   async (error) => {
     const originalRequest = error.config;
+    const isRefreshRequest = originalRequest?.url?.includes("/auth/refresh");
+
+    // refresh 요청 자체가 401이면 재귀 refresh를 막고 즉시 실패 처리
+    if (error.response?.status === 401 && isRefreshRequest) {
+      useAuthStore.getState().setLogout();
+      return Promise.reject(error);
+    }
 
     // 401이고 아직 재시도 안 했으면
     if (error.response?.status === 401 && !originalRequest._retry) {

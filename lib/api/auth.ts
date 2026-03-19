@@ -1,4 +1,15 @@
 import axiosInstance from "../axiosInstance";
+import { User } from "@/types/auth";
+
+interface RefreshResponse {
+  data: {
+    accessToken: string;
+  };
+}
+
+interface MeResponse<TUser = User> {
+  data: TUser;
+}
 
 export const signin = async (name: string, email: string, password: string) => {
   try {
@@ -36,4 +47,14 @@ export const userInfo = async () => {
   } catch (error) {
     throw error;
   }
+};
+
+export const refreshSession = async () => {
+  const refreshResponse = await axiosInstance.post<RefreshResponse>("/auth/refresh");
+  const meResponse = await axiosInstance.get<MeResponse>("/users/me");
+
+  return {
+    accessToken: refreshResponse.data.data.accessToken,
+    user: meResponse.data.data,
+  };
 };

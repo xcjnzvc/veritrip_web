@@ -5,5 +5,5 @@ interface AdminTitleProps {
 }
 
 export function AdminTitle({ children }: AdminTitleProps) {
-  return <h1 className={cn("text-2xl font-bold")}>{children}</h1>;
+  return <h1 className={cn("text-2xl font-bold tracking-tight")}>{children}</h1>;
 }

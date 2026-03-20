@@ -14,7 +14,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "대시보드", href: "/admin" },
   {
-    label: "에이전트 관리",
+    label: "에이전트 그룹",
     href: "/admin/agent",
   },
 ];

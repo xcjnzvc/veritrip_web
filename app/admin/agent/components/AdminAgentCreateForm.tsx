@@ -11,14 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AgentCreateDto } from "@/lib/api/agent";
+import type { AgentCreateDto } from "@/lib/types/agent";
 import { useCreate } from "@refinedev/core";
 
-interface AgentCreateFormProps {
+interface AdminAgentCreateFormProps {
   onSuccess: () => void;
 }
 
-export default function AgentCreateForm({ onSuccess }: AgentCreateFormProps) {
+export default function AdminAgentCreateForm({ onSuccess }: AdminAgentCreateFormProps) {
   const { mutate, mutation } = useCreate();
 
   const [form, setForm] = useState<AgentCreateDto>({
@@ -32,8 +32,9 @@ export default function AgentCreateForm({ onSuccess }: AgentCreateFormProps) {
   });
 
   const handleChange =
-    (field: keyof AgentCreateDto) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev) => ({
+    (field: keyof AgentCreateDto) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((prev: AgentCreateDto) => ({
         ...prev,
         [field]: e.target.value,
       }));
@@ -104,7 +105,7 @@ export default function AgentCreateForm({ onSuccess }: AgentCreateFormProps) {
         <Select
           value={form.provider}
           onValueChange={(value) =>
-            setForm((prev) => ({
+            setForm((prev: AgentCreateDto) => ({
               ...prev,
               provider: value as AgentCreateDto["provider"],
             }))
@@ -136,3 +137,4 @@ export default function AgentCreateForm({ onSuccess }: AgentCreateFormProps) {
     </form>
   );
 }
+

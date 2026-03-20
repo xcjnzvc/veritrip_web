@@ -36,7 +36,7 @@ const getAccessTokenFromCookies = (request: NextRequest): string | null => {
   return null;
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = getAccessTokenFromCookies(request);
   if (!token) {
     return NextResponse.redirect(new URL("/", request.url));

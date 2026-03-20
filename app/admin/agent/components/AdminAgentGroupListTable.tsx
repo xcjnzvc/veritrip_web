@@ -7,15 +7,43 @@ import { adminTw } from "../../components/styles";
 
 interface AdminAgentGroupListTableProps {
   groups: AgentGroup[];
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
   selectedGroupId: string | null;
   onSelectGroupId: (id: string) => void;
 }
 
 export default function AdminAgentGroupListTable({
   groups,
+  isLoading,
+  isError,
+  error,
   selectedGroupId,
   onSelectGroupId,
 }: AdminAgentGroupListTableProps) {
+  if (isLoading) {
+    return <div className="text-muted-foreground px-4 py-6 text-sm">로딩 중...</div>;
+  }
+
+  if (isError) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" &&
+            error !== null &&
+            "message" in error &&
+            typeof (error as { message?: unknown }).message === "string"
+          ? (error as { message?: string }).message ?? "알 수 없는 오류"
+          : "알 수 없는 오류";
+
+    return (
+      <div className="px-4 py-6 text-sm text-red-400">
+        그룹 목록 조회에 실패했습니다: {message}
+      </div>
+    );
+  }
+
   const columns: AdminTableColumn[] = [
     { key: "name", header: "이름", width: "45%" },
     { key: "strategy", header: "전략", width: "35%" },

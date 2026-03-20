@@ -1,5 +1,5 @@
 export const adminTw = {
-  page: "mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6",
+  page: "mx-auto w-full max-w-8xl space-y-6 p-4 sm:p-6",
   headerBlock: "space-y-1",
   subtitle: "text-sm text-muted-foreground",
   rowBetween: "flex items-center justify-between",
@@ -17,13 +17,13 @@ export const adminTw = {
   providerBadge: "rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-foreground",
   dangerButton:
     "inline-flex items-center gap-1 rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-500 disabled:opacity-60",
-  paginationWrap: "flex items-center justify-between text-xs text-muted-foreground",
+  paginationWrap: "flex p-2 items-center justify-between text-xs text-muted-foreground",
   iconButton:
     "inline-flex size-8 items-center justify-center rounded-md border border-border bg-background transition hover:bg-muted disabled:opacity-60",
   infoText: "text-sm text-muted-foreground",
   errorText: "text-sm text-red-400",
   infoCard: "rounded-md border border-border p-4 text-sm text-foreground",
-  modalBackdrop: "fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]",
+  modalBackdrop:
+    "fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-[2px]",
   modalCard: "w-full max-w-3xl rounded-xl border border-border bg-background p-6 shadow-xl",
 } as const;
-

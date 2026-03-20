@@ -15,10 +15,18 @@ import type {
 } from "../types/agent-group";
 import { agentGroupKeys } from "../queryKeys/agent-group";
 
-export const useAgentGroupListQuery = (params: AgentGroupListQuery) => {
+export const useAgentGroupListQuery = (
+  params: AgentGroupListQuery,
+  options?: {
+    enabled?: boolean;
+    initialData?: AgentGroupListResponse;
+  },
+) => {
   return useQuery<AgentGroupListResponse>({
     queryKey: agentGroupKeys.list(params),
     queryFn: () => fetchAgentGroups(params),
+    enabled: options?.enabled,
+    initialData: options?.initialData,
   });
 };
 

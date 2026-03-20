@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userInfo } from "@/lib/api/auth";
-import { AdminTitle } from "./components/title";
 import LoginModal from "@/app/main/_components/LoginModal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { adminTw } from "./components/styles";
+import AdminPageHeader from "./components/AdminPageHeader";
 
 export default function AdminPage() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -24,7 +24,7 @@ export default function AdminPage() {
   return (
     <div className={adminTw.page}>
       <div className={adminTw.rowBetween}>
-        <AdminTitle>Admin Page</AdminTitle>
+        <AdminPageHeader title="Admin Page" />
         {!isLoggedIn && (
           <button
             type="button"

@@ -11,8 +11,8 @@ import {
 import { useCreateAgentGroupMutation } from "@/lib/queries/agent-group";
 import type { AgentGroupCreateDto, AgentGroupStrategy } from "@/lib/types/agent-group";
 import { ChangeEvent, FormEvent, useState } from "react";
-import AdminInput from "./AdminInput";
-import AdminTextarea from "./AdminTextarea";
+import AdminInput from "../../components/AdminInput";
+import AdminTextarea from "../../components/AdminTextarea";
 
 interface AdminAgentGroupCreateFormProps {
   onSuccess: () => void;
@@ -116,4 +116,3 @@ export default function AdminAgentGroupCreateForm({ onSuccess }: AdminAgentGroup
     </form>
   );
 }
-

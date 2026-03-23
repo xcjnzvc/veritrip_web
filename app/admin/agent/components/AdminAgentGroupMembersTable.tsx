@@ -51,7 +51,7 @@ export default function AdminAgentGroupMembersTable({
             error !== null &&
             "message" in error &&
             typeof (error as { message?: unknown }).message === "string"
-          ? (error as { message?: string }).message ?? "알 수 없는 오류"
+          ? ((error as { message?: string }).message ?? "알 수 없는 오류")
           : "알 수 없는 오류";
 
     return <div className="text-sm text-red-400">그룹 조회에 실패했습니다: {message}</div>;
@@ -103,7 +103,11 @@ export default function AdminAgentGroupMembersTable({
             </div>
           </td>
           <td className={adminTw.tableCell}>
-            {m.role ? <span className={adminTw.providerBadge}>{m.role}</span> : <span className="text-muted-foreground text-xs">-</span>}
+            {m.role ? (
+              <span className={adminTw.providerBadge}>{m.role}</span>
+            ) : (
+              <span className="text-muted-foreground text-xs">-</span>
+            )}
           </td>
           <td className={adminTw.tableCell}>
             <span className="text-muted-foreground text-xs">{m.routerKeywords || "-"}</span>

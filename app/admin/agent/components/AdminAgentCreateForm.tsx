@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-import AdminInput from "./AdminInput";
-import AdminTextarea from "./AdminTextarea";
+import AdminInput from "../../components/AdminInput";
+import AdminTextarea from "../../components/AdminTextarea";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -32,8 +32,7 @@ export default function AdminAgentCreateForm({ onSuccess }: AdminAgentCreateForm
   });
 
   const handleChange =
-    (field: keyof AgentCreateDto) =>
-    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    (field: keyof AgentCreateDto) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev: AgentCreateDto) => ({
         ...prev,
         [field]: e.target.value,
@@ -137,4 +136,3 @@ export default function AdminAgentCreateForm({ onSuccess }: AdminAgentCreateForm
     </form>
   );
 }
-

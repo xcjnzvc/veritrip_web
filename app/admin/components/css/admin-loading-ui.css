@@ -1,0 +1,34 @@
+/* AdminLoadingUI (simple) — 키프레임만 유지 (나머지는 Tailwind + 테마 토큰) */
+
+@keyframes admin-loading-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes admin-loading-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.admin-loading-fade-slide {
+  animation: admin-loading-fade-slide 0.3s ease;
+}
+
+.admin-loading-fade-slide-short {
+  animation: admin-loading-fade-slide 0.25s ease;
+}
+
+.admin-loading-status-dot--blink {
+  animation: admin-loading-blink 1.2s ease-in-out infinite;
+}

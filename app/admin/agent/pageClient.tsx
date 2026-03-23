@@ -13,6 +13,7 @@ import type { Agent } from "@/lib/types/agent";
 import type { AgentGroupMember, AgentGroupMemberDto } from "@/lib/types/agent-group";
 import type { AgentGroupListResponse } from "@/lib/api/agent-group";
 import { Plus, Search, Trash2, X } from "lucide-react";
+import AdminCardSectionHeader from "../components/AdminCardSectionHeader";
 import AdminPagination from "../components/AdminPagination";
 import { adminTw } from "../components/styles";
 import AdminDataTable from "../components/AdminDataTable";
@@ -108,7 +109,7 @@ export default function AgentPageClient({
   return (
     <div className={adminTw.page}>
       <AdminPageHeader
-        title="에이전트 그룹"
+        title="에이전트"
         subtitle="에이전트 생성 전에 그룹을 먼저 만들고, 멤버 에이전트를 구성하세요."
       />
 
@@ -116,20 +117,16 @@ export default function AgentPageClient({
         {/* left: groups */}
         <div className="lg:col-span-1">
           <div className={adminTw.card}>
-            <div className="border-border border-b px-4 py-3">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold">그룹 목록</span>
-                  <span className="text-muted-foreground text-xs">
-                    총 {meta?.totalCount ?? 0}개
-                  </span>
-                </div>
+            <AdminCardSectionHeader
+              title="그룹 목록"
+              description={`총 ${meta?.totalCount ?? 0}개`}
+              actions={
                 <Button size="sm" onClick={() => setIsGroupCreateOpen(true)} className="gap-2">
                   <Plus className="size-4" />
                   그룹 생성
                 </Button>
-              </div>
-            </div>
+              }
+            />
 
             <AdminAgentGroupListTable
               groups={groups}
@@ -154,21 +151,18 @@ export default function AgentPageClient({
         {/* right: detail */}
         <div className="lg:col-span-2">
           <div className={adminTw.card}>
-            <div className="border-border border-b px-4 py-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">선택된 그룹</span>
-                    {group?.strategy && (
-                      <span className={adminTw.providerBadge}>{group.strategy}</span>
-                    )}
-                  </div>
-                  <div className="text-muted-foreground text-xs">
-                    {group ? `${group.name} (${membersSorted.length} members)` : "그룹을 선택하세요."}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
+            <AdminCardSectionHeader
+              title="선택된 그룹"
+              titleEndContent={
+                group?.strategy ? (
+                  <span className={adminTw.providerBadge}>{group.strategy}</span>
+                ) : null
+              }
+              description={
+                group ? `${group.name} (${membersSorted.length} members)` : "그룹을 선택하세요."
+              }
+              actions={
+                <>
                   <Button
                     size="sm"
                     onClick={() => setMemberDialogOpen(true)}
@@ -197,9 +191,9 @@ export default function AgentPageClient({
                     <Trash2 className="size-4" />
                     삭제
                   </Button>
-                </div>
-              </div>
-            </div>
+                </>
+              }
+            />
 
             {/** 멤버 테이블 */}
             <div className="p-4">
@@ -399,4 +393,3 @@ export default function AgentPageClient({
     </div>
   );
 }
-

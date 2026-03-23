@@ -1,10 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userInfo } from "@/lib/api/auth";
-import LoginModal from "@/app/main/_components/LoginModal";
 import { useAuthStore } from "@/store/useAuthStore";
+
+const LoginModal = dynamic(() => import("@/app/main/_components/LoginModal"), {
+  ssr: false,
+});
 import { adminTw } from "./components/styles";
 import AdminPageHeader from "./components/AdminPageHeader";
 

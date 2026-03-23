@@ -1,6 +1,6 @@
 import type { AgentGroupListResponse } from "@/lib/api/agent-group";
 import { authenticatedFetch } from "@/lib/server/authenticatedFetch";
-import AgentPageClient from "./AgentPageClient";
+import AgentPageClient from "./pageClient";
 
 async function fetchInitialGroupList(): Promise<AgentGroupListResponse | undefined> {
   const apiBase = process.env.NEXT_PUBLIC_API_URL;

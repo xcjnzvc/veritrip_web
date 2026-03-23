@@ -1,7 +1,9 @@
 "use client";
 
 import { Refine } from "@refinedev/core";
-import routerProvider from "@refinedev/nextjs-router";
+// App Router는 반드시 `/app` 엔트리를 사용합니다. 기본 패키지 엔트리는 Pages Router용이라
+// Turbopack에서 청크 로드/하이드레이션 오류가 날 수 있습니다.
+import routerProvider from "@refinedev/nextjs-router/app";
 import { AdminHeader } from "./components/header";
 import { cn } from "@/lib/utils";
 import dataProvider from "@/lib/refine/dataProvider";

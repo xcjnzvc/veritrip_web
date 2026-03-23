@@ -10,7 +10,6 @@ import { usePathname } from "next/navigation";
 export default function Header() {
   const pathname = usePathname();
   const { accessToken, user } = useAuthStore();
-  // const { step } = useSurveyStore();
   const isLoggedIn = !!accessToken;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(false);
@@ -18,8 +17,6 @@ export default function Header() {
   if (pathname?.startsWith("/admin")) {
     return null;
   }
-
-  // const totalSteps = surveyMockData.steps.length;
 
   const displayUserName = user?.name ? (user.name.length > 2 ? user.name.slice(1) : user.name) : "";
 
@@ -29,17 +26,24 @@ export default function Header() {
       <div className="flex items-center gap-[14px]">
         <Image src="/icon/mode-light.svg" alt="Mode Light Icon" width={24} height={24} />
         {isLoggedIn ? (
-          /* 이 div가 relative이면서 동시에 '자리를 차지하는 방식'이 헤더 레이아웃을 방해하지 않아야 합니다 */
           <div className="relative flex items-center">
             <button
-              className="h-[44px] w-[44px] rounded-full border border-[#ddd] bg-[#F4F4F4] text-[12px] font-bold"
-              onClick={() => setUserInfo(true)}
-            >
-              {displayUserName}
-            </button>
+  className="flex h-[44px] w-[44px] items-center justify-center rounded-full border border-[#ddd] bg-[#F4F4F4] text-[12px] font-bold"
+  onClick={() => setUserInfo(true)}
+>
+  {displayUserName}
+</button>
 
-            {/* UserInfoBox는 여기서 absolute여야 헤더 높이에 영향을 주지 않습니다 */}
-            {userInfo && <UserInfoBox onClose={() => setUserInfo(false)} />}
+            {userInfo && (
+              <>
+                {/* 투명한 backdrop - 클릭하면 닫힘 */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setUserInfo(false)}
+                />
+                <UserInfoBox onClose={() => setUserInfo(false)} />
+              </>
+            )}
           </div>
         ) : (
           <button

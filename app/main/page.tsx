@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import SearchKeywordTag from "./_components/SearchKeywordTag";
 import SearchBar from "./_components/SearchBar";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AccessModal from "./_components/AccessModal";
 import { useRouter } from "next/navigation";
 import LoginModal from "./_components/LoginModal";
@@ -15,6 +15,10 @@ export default function MainPageContent() {
   const userName = user?.name || "";
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // useEffect()=>{
+  //   console.log
+  // }
 
   const handleSearchClick = () => {
     if (!isLoggedIn) {

@@ -6,11 +6,11 @@ import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
-import { loginUser, refreshSession, signin } from "@/lib/api/auth";
+// import { loginUser, refreshSession, signin } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-
+import { loginUser, refreshSession, signin, userInfo } from "@/lib/api/auth";
 interface ApiErrorResponse {
   code: number;
   message: string;
@@ -48,15 +48,18 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         }
 
         // 실무형 세션 고정: 로그인 직후 쿠키 기반 refresh로 accessToken/user를 재동기화한다.
-        try {
-          const session = await refreshSession();
+      try {
+          const session = await refreshSession(); // 400 에러 발생
           setLogin(session.accessToken);
-          setUserInfo(session.user);
-        } catch {
-          // refresh 동기화 실패 시 로그인 응답 accessToken을 최소한으로 반영
+          setUserInfo(session.user);  // ← 여기 못 옴
+        } catch (e) {
           if (result?.data?.accessToken) {
             setLogin(result.data.accessToken);
           }
+          try {
+            const me = await userInfo(); // ← 직접 /users/me 호출해서 user 가져옴 ✅
+            setUserInfo(me.data);        // ← user 저장 성공 ✅
+          } catch {}
         }
 
         toast.success("로그인이 완료되었습니다!");

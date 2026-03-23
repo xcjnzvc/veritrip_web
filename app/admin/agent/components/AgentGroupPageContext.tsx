@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 
 export type AgentGroupPageContextValue = {
   selectedGroupId: string | null;
@@ -12,10 +20,7 @@ const AgentGroupPageContext = createContext<AgentGroupPageContextValue | null>(n
 export function AgentGroupPageProvider({ children }: { children: ReactNode }) {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  const value = useMemo(
-    () => ({ selectedGroupId, setSelectedGroupId }),
-    [selectedGroupId],
-  );
+  const value = useMemo(() => ({ selectedGroupId, setSelectedGroupId }), [selectedGroupId]);
 
   return <AgentGroupPageContext.Provider value={value}>{children}</AgentGroupPageContext.Provider>;
 }

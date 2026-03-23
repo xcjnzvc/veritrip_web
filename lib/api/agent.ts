@@ -11,7 +11,7 @@ import { ApiResponse } from "../types/api";
 
 // 에이전트 생성 (POST /agents)
 export const createAgent = async (body: AgentCreateDto): Promise<ApiResponse> => {
-  const response = await axiosInstance.post<ApiResponse>("/agents", body);
+  const response = await axiosInstance.post<ApiResponse>("/mgmt/agents", body);
   return response.data;
 };
 
@@ -23,24 +23,24 @@ export const fetchAgents = async (params: AgentListQuery): Promise<AgentListResp
 
 // 에이전트 단건 조회 (GET /agents/:id)
 export const fetchAgentDetail = async (id: string): Promise<AgentListResponse> => {
-  const response = await axiosInstance.get<AgentListResponse>(`/agents/${id}`);
+  const response = await axiosInstance.get<AgentListResponse>(`/mgmt/agents/${id}`);
   return response.data;
 };
 
 // 에이전트 수정 (PATCH /agents/:id)
 export const updateAgent = async (id: string, body: AgentUpdateDto): Promise<ApiResponse> => {
-  const response = await axiosInstance.patch<ApiResponse>(`/agents/${id}`, body);
+  const response = await axiosInstance.patch<ApiResponse>(`/mgmt/agents/${id}`, body);
   return response.data;
 };
 
 // 에이전트 삭제 (DELETE /agents/:id)
 export const deleteAgent = async (id: string): Promise<ApiResponse> => {
-  const response = await axiosInstance.delete<ApiResponse>(`/agents/${id}`);
+  const response = await axiosInstance.delete<ApiResponse>(`/mgmt/agents/${id}`);
   return response.data;
 };
 
 // 에이전트 실행 (POST /agents/:id/run)
 export const runAgent = async (id: string, body: AgentRunDto): Promise<AgentRunResponse> => {
-  const response = await axiosInstance.post<AgentRunResponse>(`/agents/${id}/run`, body);
+  const response = await axiosInstance.post<AgentRunResponse>(`/mgmt/agents/${id}/run`, body);
   return response.data;
 };

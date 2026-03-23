@@ -1,5 +1,6 @@
 "use client";
 
+import type { AgentGroupListResponse } from "@/lib/api/agent-group";
 import { AGENT_GROUP_LIST_TAKE } from "@/lib/constants/agentGroupList";
 import { useAgentGroupListQuery } from "@/lib/queries/agent-group";
 import { Button } from "@/components/ui/button";
@@ -15,21 +16,35 @@ import AdminAgentGroupListTable from "./AdminAgentGroupListTable";
 
 export type AdminAgentGroupListCardProps = {
   initialGroupPage?: number;
+  initialGroupList?: AgentGroupListResponse;
+  initialGroupListUpdatedAt?: number;
 };
 
 export default function AdminAgentGroupListCard({
   initialGroupPage = 1,
+  initialGroupList,
+  initialGroupListUpdatedAt,
 }: AdminAgentGroupListCardProps) {
   const { selectedGroupId, setSelectedGroupId } = useAgentGroupPage();
   const [groupPage, setGroupPage] = useState(initialGroupPage);
   const [isGroupCreateOpen, setIsGroupCreateOpen] = useState(false);
+
+  const useServerSeed =
+    initialGroupList != null &&
+    initialGroupListUpdatedAt != null &&
+    groupPage === initialGroupPage;
 
   const {
     data: groupListData,
     isLoading,
     isError,
     error,
-  } = useAgentGroupListQuery({ page: groupPage, take: AGENT_GROUP_LIST_TAKE });
+  } = useAgentGroupListQuery(
+    { page: groupPage, take: AGENT_GROUP_LIST_TAKE },
+    useServerSeed
+      ? { initialData: initialGroupList, initialDataUpdatedAt: initialGroupListUpdatedAt }
+      : undefined,
+  );
 
   const groups = groupListData?.data ?? [];
   const meta = groupListData?.meta;

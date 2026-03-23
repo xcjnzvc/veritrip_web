@@ -27,7 +27,7 @@ export interface AgentCreateDto {
   rolePrompt: string;
   taskPrompt: string;
   outputPrompt: string;
-  provider: "XAI" | "GEMINAI";
+  provider: "XAI" | "GEMINI";
   modelId: string;
   groupId?: string;
 }
@@ -46,3 +46,8 @@ export interface AgentRunDto {
 }
 
 export type AgentRunResponse = ApiResponseWithData<unknown>;
+
+export interface AiProvider {
+  XAI: "XAI";
+  GEMINI: "GEMINI";
+}

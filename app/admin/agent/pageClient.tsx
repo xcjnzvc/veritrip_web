@@ -1,12 +1,21 @@
 "use client";
 
+import type { AgentGroupListResponse } from "@/lib/api/agent-group";
 import AdminPageHeader from "../components/AdminPageHeader";
 import { adminTw } from "../components/styles";
 import { AgentGroupPageProvider } from "./components/AgentGroupPageContext";
 import AdminAgentGroupDetailCard from "./components/AdminAgentGroupDetailCard";
 import AdminAgentGroupListCard from "./components/AdminAgentGroupListCard";
 
-export default function AgentPageClient() {
+export type AgentPageClientProps = {
+  initialGroupList?: AgentGroupListResponse;
+  initialGroupListUpdatedAt?: number;
+};
+
+export default function AgentPageClient({
+  initialGroupList,
+  initialGroupListUpdatedAt,
+}: AgentPageClientProps) {
   return (
     <AgentGroupPageProvider>
       <div className={adminTw.page}>
@@ -16,7 +25,10 @@ export default function AgentPageClient() {
         />
 
         <div className="grid gap-4 lg:grid-cols-3">
-          <AdminAgentGroupListCard />
+          <AdminAgentGroupListCard
+            initialGroupList={initialGroupList}
+            initialGroupListUpdatedAt={initialGroupListUpdatedAt}
+          />
           <AdminAgentGroupDetailCard />
         </div>
       </div>

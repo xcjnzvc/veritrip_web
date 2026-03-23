@@ -20,6 +20,8 @@ export const useAgentGroupListQuery = (
   options?: {
     enabled?: boolean;
     initialData?: AgentGroupListResponse;
+    /** 서버 패칭 시각(ms). 있으면 마운트 직후 불필요한 즉시 재요청을 줄입니다. */
+    initialDataUpdatedAt?: number;
   },
 ) => {
   return useQuery<AgentGroupListResponse>({
@@ -27,6 +29,8 @@ export const useAgentGroupListQuery = (
     queryFn: () => fetchAgentGroups(params),
     enabled: options?.enabled,
     initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
+    staleTime: options?.initialData != null ? 30_000 : undefined,
   });
 };
 

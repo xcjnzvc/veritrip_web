@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * 에이전트 생성 다이얼로그(모달).
- * 폼 필드 + AdminModalDialog를 함께 제공합니다.
- */
-
 import { useState, ChangeEvent, FormEvent } from "react";
 import AdminInput from "../../components/AdminInput";
 import AdminModalDialog from "../../components/AdminModalDialog";
@@ -107,8 +102,8 @@ function getInitialForm(): AgentCreateDto {
     rolePrompt: "",
     taskPrompt: "",
     outputPrompt: "",
-    provider: "GEMINAI",
-    modelId: "",
+    provider: "GEMINI",
+    modelId: "gemini-1.5-flash",
     groupId: undefined,
   };
 }

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * 에이전트 생성 폼(필드만).
+ * 레이아웃·제목·닫기는 부모에서 `AdminModalDialog` 등으로 감싸 동일한 다이얼로그 UI를 맞춥니다.
+ */
+
 import { useState, ChangeEvent, FormEvent } from "react";
 import AdminInput from "../../components/AdminInput";
 import AdminTextarea from "../../components/AdminTextarea";

@@ -18,8 +18,10 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       accessToken: null,
       user: null,
+      isAuthReady: false,
       setLogin: (accessToken) => set({ accessToken }),
       setUserInfo: (userData) => set({ user: userData }),
+      setAuthReady: (ready) => set({ isAuthReady: ready }),
       setLogout: () => set({ accessToken: null, user: null }), // 로그아웃 시 둘 다 초기화
     }),
     {

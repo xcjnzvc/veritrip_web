@@ -6,6 +6,7 @@ import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "react-hot-toast";
 import Header from "@/components/Header";
 import Providers from "@/components/Providers"; // ✅ 추가
+import { cn } from "@/lib/utils";
 
 const pretendard = localFont({
   src: [
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={cn("font-sans", geist.variable)}>
+    <html lang="ko" className={cn("font-sans", pretendard.variable)}>
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
         <Providers>
           {" "}

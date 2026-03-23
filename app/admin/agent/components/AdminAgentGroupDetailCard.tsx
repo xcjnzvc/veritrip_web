@@ -1,14 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { AgentGroupDetailResponse, AgentGroupListResponse } from "@/lib/api/agent-group";
 import { agentKeys } from "@/lib/queryKeys/agent";
 import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
 import {
   useAgentGroupDetailQuery,
+  useDeleteAgentGroupMemberMutation,
   useDeleteAgentGroupMutation,
-  useUpdateAgentGroupMutation,
 } from "@/lib/queries/agent-group";
-import type { AgentGroupMember, AgentGroupMemberDto } from "@/lib/types/agent-group";
+import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -40,29 +41,75 @@ export default function AdminAgentGroupDetailCard() {
     return [...members].sort((a, b) => a.order - b.order);
   }, [group?.members]);
 
-  const updateGroupMembersMutation = useUpdateAgentGroupMutation();
+  const deleteGroupMemberMutation = useDeleteAgentGroupMemberMutation();
   const deleteGroupMutation = useDeleteAgentGroupMutation();
 
   const resetMemberDialog = () => {
     setMemberDialogOpen(false);
   };
 
-  const handleRemoveMember = (agentId: string) => {
-    if (!selectedGroupId) return;
+  const handleRemoveMember = (groupId: string, agentId: string) => {
+    if (!selectedGroupId || selectedGroupId !== groupId) return;
 
-    const remaining: AgentGroupMemberDto[] = membersSorted
-      .filter((x) => x.agentId !== agentId)
-      .map((x, idx) => ({
-        agentId: x.agentId,
-        order: idx,
-        role: x.role,
-        routerKeywords: x.routerKeywords,
-      }));
-
-    updateGroupMembersMutation.mutate({
-      id: selectedGroupId,
-      body: { members: remaining },
+    const previousGroupLists = queryClient.getQueriesData<AgentGroupListResponse>({
+      queryKey: agentGroupKeys.lists(),
     });
+    const previousGroupDetail = queryClient.getQueryData<AgentGroupDetailResponse>(
+      agentGroupKeys.detail(selectedGroupId),
+    );
+
+    queryClient.setQueriesData<AgentGroupListResponse>(
+      { queryKey: agentGroupKeys.lists() },
+      (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((g) => {
+            if (g.id !== selectedGroupId) return g;
+            if (!Array.isArray(g.members)) return g;
+            return {
+              ...g,
+              members: g.members.slice(0, Math.max(0, g.members.length - 1)),
+            };
+          }),
+        };
+      },
+    );
+
+    queryClient.setQueryData<AgentGroupDetailResponse>(
+      agentGroupKeys.detail(selectedGroupId),
+      (old) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            members: (old.data.members ?? []).filter((m) => m.agentId !== agentId),
+          },
+        };
+      },
+    );
+
+    deleteGroupMemberMutation.mutate(
+      {
+        id: groupId,
+        agentId,
+      },
+      {
+        onError: () => {
+          for (const [queryKey, data] of previousGroupLists) {
+            queryClient.setQueryData(queryKey, data);
+          }
+          if (previousGroupDetail) {
+            queryClient.setQueryData(agentGroupKeys.detail(selectedGroupId), previousGroupDetail);
+          }
+        },
+        onSettled: () => {
+          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(selectedGroupId) });
+        },
+      },
+    );
   };
 
   const handleConfirmDeleteGroup = () => {
@@ -114,7 +161,7 @@ export default function AdminAgentGroupDetailCard() {
                   disabled={!selectedGroupId || deleteGroupMutation.isPending}
                 >
                   <Trash2 className="size-4" />
-                  삭제
+                  그룹 삭제
                 </Button>
               </>
             }
@@ -127,7 +174,7 @@ export default function AdminAgentGroupDetailCard() {
               isError={isGroupDetailError}
               error={groupDetailError}
               isGroupSelected={!!group}
-              isRemoving={updateGroupMembersMutation.isPending}
+              isRemoving={deleteGroupMemberMutation.isPending}
               onRemoveMember={handleRemoveMember}
               onMemberRowClick={(agentId) => {
                 setAgentCreateOpen(false);

@@ -27,6 +27,7 @@ export interface AgentListQuery {
   page?: number;
   take?: number;
   keyword?: string;
+  excludeGroupId?: string;
 }
 
 export type AgentListResponse = ListResponse<Agent>;

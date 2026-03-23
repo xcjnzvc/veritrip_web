@@ -3,6 +3,7 @@ import {
   AgentGroupDetailResponse,
   AgentGroupListResponse,
   createAgentGroup,
+  deleteAgentGroupMember,
   deleteAgentGroup,
   fetchAgentGroups,
   fetchAgentGroupDetail,
@@ -72,6 +73,19 @@ export const useDeleteAgentGroupMutation = () => {
     mutationFn: (id: string) => deleteAgentGroup(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+    },
+  });
+};
+
+export const useDeleteAgentGroupMemberMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, agentId }: { id: string; agentId: string }) =>
+      deleteAgentGroupMember(id, agentId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(variables.id) });
     },
   });
 };

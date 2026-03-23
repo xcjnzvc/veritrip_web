@@ -11,6 +11,14 @@ import {
 import { ApiResponse } from "../types/api";
 
 export type { AgentDetailResponse } from "../types/agent";
+export type {
+  AgentCreateDto,
+  AgentListQuery,
+  AgentListResponse,
+  AgentRunDto,
+  AgentRunResponse,
+  AgentUpdateDto,
+} from "../types/agent";
 
 // 에이전트 생성 (POST /agents)
 export const createAgent = async (body: AgentCreateDto): Promise<ApiResponse> => {

@@ -1,10 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { AgentGroupDetailResponse, AgentGroupListResponse } from "@/lib/api/agent-group";
+import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
 import { useAgentListQuery } from "@/lib/queries/agent";
 import { useUpdateAgentGroupMutation } from "@/lib/queries/agent-group";
 import type { Agent } from "@/lib/types/agent";
 import type { AgentGroupMember, AgentGroupMemberDto } from "@/lib/types/agent-group";
+import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminDataTable from "../../components/AdminDataTable";
@@ -27,10 +30,14 @@ export default function AdminAgentGroupAddMemberDialog({
   onClose,
   onOpenAgentCreate,
 }: AdminAgentGroupAddMemberDialogProps) {
+  const queryClient = useQueryClient();
   const [agentSearchQuery, setAgentSearchQuery] = useState("");
   const [selectedAgentIds, setSelectedAgentIds] = useState<Set<string>>(new Set());
 
-  const agentSelect = useAgentListQuery({ page: 1, take: 100 }, { enabled: true });
+  const agentSelect = useAgentListQuery(
+    { page: 1, take: 100, excludeGroupId: selectedGroupId ?? undefined },
+    { enabled: !!selectedGroupId },
+  );
   const agents = useMemo(() => (agentSelect.data?.data ?? []) as Agent[], [agentSelect.data?.data]);
 
   const filteredAgents = useMemo(() => {
@@ -56,6 +63,10 @@ export default function AdminAgentGroupAddMemberDialog({
     const selectedInList = filteredAgents
       .map((a: Agent) => a.id)
       .filter((id: string) => selectedAgentIds.has(id) && !existingAgentIds.has(id));
+    if (selectedInList.length === 0) {
+      onClose();
+      return;
+    }
 
     const combinedBase: Array<{
       agentId: string;
@@ -81,11 +92,90 @@ export default function AdminAgentGroupAddMemberDialog({
       order: idx,
     }));
 
+    const previousGroupLists = queryClient.getQueriesData<AgentGroupListResponse>({
+      queryKey: agentGroupKeys.lists(),
+    });
+    const previousGroupDetail = queryClient.getQueryData<AgentGroupDetailResponse>(
+      agentGroupKeys.detail(selectedGroupId),
+    );
+
+    queryClient.setQueriesData<AgentGroupListResponse>(
+      { queryKey: agentGroupKeys.lists() },
+      (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((g) => {
+            if (g.id !== selectedGroupId) return g;
+            if (!Array.isArray(g.members)) return g;
+            return {
+              ...g,
+              members: [
+                ...g.members,
+                ...selectedInList.map((agentId, idx) => ({
+                  id: `optimistic-${selectedGroupId}-${agentId}`,
+                  groupId: selectedGroupId,
+                  agentId,
+                  order: g.members!.length + idx,
+                  role: null,
+                  routerKeywords: null,
+                  agent: {
+                    id: agentId,
+                    name: "추가 중...",
+                  },
+                })),
+              ],
+            };
+          }),
+        };
+      },
+    );
+
+    queryClient.setQueryData<AgentGroupDetailResponse>(
+      agentGroupKeys.detail(selectedGroupId),
+      (old) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            members: [
+              ...(old.data.members ?? []),
+              ...selectedInList.map((agentId, idx) => ({
+                id: `optimistic-${selectedGroupId}-${agentId}`,
+                groupId: selectedGroupId,
+                agentId,
+                order: (old.data.members ?? []).length + idx,
+                role: null,
+                routerKeywords: null,
+                agent: {
+                  id: agentId,
+                  name: "추가 중...",
+                },
+              })),
+            ],
+          },
+        };
+      },
+    );
+
     updateGroupMembersMutation.mutate(
       { id: selectedGroupId, body: { members: combined } },
       {
+        onError: () => {
+          for (const [queryKey, data] of previousGroupLists) {
+            queryClient.setQueryData(queryKey, data);
+          }
+          if (previousGroupDetail) {
+            queryClient.setQueryData(agentGroupKeys.detail(selectedGroupId), previousGroupDetail);
+          }
+        },
         onSuccess: () => {
           onClose();
+        },
+        onSettled: () => {
+          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(selectedGroupId) });
         },
       },
     );

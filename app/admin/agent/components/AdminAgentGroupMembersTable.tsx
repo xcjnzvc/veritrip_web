@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { Bot, Trash2 } from "lucide-react";
 import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
@@ -13,7 +14,7 @@ interface AdminAgentGroupMembersTableProps {
   error: unknown;
   isGroupSelected: boolean;
   isRemoving: boolean;
-  onRemoveMember: (agentId: string) => void;
+  onRemoveMember: (groupId: string, agentId: string) => void;
   onMemberRowClick?: (agentId: string) => void;
 }
 
@@ -102,20 +103,21 @@ export default function AdminAgentGroupMembersTable({
             <span className="text-muted-foreground text-xs">{m.routerKeywords || "-"}</span>
           </td>
           <td className={adminTw.tableCell} style={{ textAlign: "right" }}>
-            <button
+            <Button
+              size="sm"
               type="button"
-              className={adminTw.dangerButton}
+              variant="destructive"
               onClick={(e) => {
                 e.stopPropagation();
                 const ok = window.confirm("멤버를 제거할까요?");
                 if (!ok) return;
-                onRemoveMember(m.agentId);
+                onRemoveMember(m.groupId, m.agentId);
               }}
               disabled={isRemoving}
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-4" />
               제거
-            </button>
+            </Button>
           </td>
         </>
       )}

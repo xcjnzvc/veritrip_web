@@ -14,6 +14,7 @@ interface AdminAgentGroupMembersTableProps {
   isGroupSelected: boolean;
   isRemoving: boolean;
   onRemoveMember: (agentId: string) => void;
+  onMemberRowClick?: (agentId: string) => void;
 }
 
 export default function AdminAgentGroupMembersTable({
@@ -24,6 +25,7 @@ export default function AdminAgentGroupMembersTable({
   isGroupSelected,
   isRemoving,
   onRemoveMember,
+  onMemberRowClick,
 }: AdminAgentGroupMembersTableProps) {
   if (isLoading) {
     return <AdminInlineLoading label="그룹·멤버 정보를 불러오는 중…" />;
@@ -79,6 +81,7 @@ export default function AdminAgentGroupMembersTable({
       columns={columns}
       rows={membersSorted}
       getRowKey={(m) => m.id}
+      onRowClick={onMemberRowClick ? (m) => onMemberRowClick(m.agentId) : undefined}
       renderRowCells={(m) => (
         <>
           <td className={adminTw.tableCellMono}>{m.order}</td>
@@ -102,7 +105,8 @@ export default function AdminAgentGroupMembersTable({
             <button
               type="button"
               className={adminTw.dangerButton}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 const ok = window.confirm("멤버를 제거할까요?");
                 if (!ok) return;
                 onRemoveMember(m.agentId);

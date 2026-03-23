@@ -1,6 +1,7 @@
 import axiosInstance from "../axiosInstance";
 import {
   AgentCreateDto,
+  AgentDetailResponse,
   AgentListQuery,
   AgentListResponse,
   AgentRunDto,
@@ -8,6 +9,8 @@ import {
   AgentUpdateDto,
 } from "../types/agent";
 import { ApiResponse } from "../types/api";
+
+export type { AgentDetailResponse } from "../types/agent";
 
 // 에이전트 생성 (POST /agents)
 export const createAgent = async (body: AgentCreateDto): Promise<ApiResponse> => {
@@ -21,9 +24,9 @@ export const fetchAgents = async (params: AgentListQuery): Promise<AgentListResp
   return response.data;
 };
 
-// 에이전트 단건 조회 (GET /agents/:id)
-export const fetchAgentDetail = async (id: string): Promise<AgentListResponse> => {
-  const response = await axiosInstance.get<AgentListResponse>(`/mgmt/agents/${id}`);
+// 에이전트 단건 조회 (GET /mgmt/agents/:id)
+export const fetchAgentDetail = async (id: string): Promise<AgentDetailResponse> => {
+  const response = await axiosInstance.get<AgentDetailResponse>(`/mgmt/agents/${id}`);
   return response.data;
 };
 

@@ -12,6 +12,16 @@ export interface Agent {
   modelId: string;
 }
 
+/** GET /mgmt/agents/:id 단건 응답용 (프롬프트·그룹 등 편집에 필요한 필드) */
+export interface AgentDetail extends Agent {
+  rolePrompt?: string | null;
+  taskPrompt?: string | null;
+  outputPrompt?: string | null;
+  groupId?: string | null;
+}
+
+export type AgentDetailResponse = ApiResponseWithData<AgentDetail>;
+
 // 목록 조회용 쿼리 파라미터 (AgentFindListDto에 맞춰 수정)
 export interface AgentListQuery {
   page?: number;

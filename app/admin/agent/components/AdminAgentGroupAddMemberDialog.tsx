@@ -121,10 +121,7 @@ export default function AdminAgentGroupAddMemberDialog({
 
         <div className="border-border max-h-[420px] overflow-auto rounded-lg border">
           {agentSelect.isLoading ? (
-            <AdminInlineLoading
-              label="에이전트 목록을 불러오는 중…"
-              className="min-h-[280px]"
-            />
+            <AdminInlineLoading label="에이전트 목록을 불러오는 중…" className="min-h-[280px]" />
           ) : (
             <AdminDataTable
               columns={[

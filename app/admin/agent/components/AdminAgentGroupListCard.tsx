@@ -30,9 +30,7 @@ export default function AdminAgentGroupListCard({
   const [isGroupCreateOpen, setIsGroupCreateOpen] = useState(false);
 
   const useServerSeed =
-    initialGroupList != null &&
-    initialGroupListUpdatedAt != null &&
-    groupPage === initialGroupPage;
+    initialGroupList != null && initialGroupListUpdatedAt != null && groupPage === initialGroupPage;
 
   const {
     data: groupListData,
@@ -54,9 +52,7 @@ export default function AdminAgentGroupListCard({
       <div className={adminTw.card}>
         <AdminCardSectionHeader
           title="그룹 목록"
-          description={
-            isLoading ? "목록을 불러오는 중…" : `총 ${meta?.totalCount ?? 0}개`
-          }
+          description={isLoading ? "목록을 불러오는 중…" : `총 ${meta?.totalCount ?? 0}개`}
           actions={
             <Button size="sm" onClick={() => setIsGroupCreateOpen(true)} className="gap-2">
               <Plus className="size-4" />

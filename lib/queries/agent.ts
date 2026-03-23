@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { AgentDetailResponse } from "../types/agent";
 import {
-  AgentDetailResponse,
   AgentListQuery,
   AgentListResponse,
   AgentRunDto,
@@ -37,7 +37,7 @@ export const useAgentDetailQuery = (id: string, enabled = true) => {
   return useQuery<AgentDetailResponse>({
     queryKey: agentKeys.detail(id),
     queryFn: () => fetchAgentDetail(id),
-    enabled,
+    enabled: enabled && !!id,
   });
 };
 

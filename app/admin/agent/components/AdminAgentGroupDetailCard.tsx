@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { agentKeys } from "@/lib/queryKeys/agent";
+import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
 import {
   useAgentGroupDetailQuery,
   useDeleteAgentGroupMutation,
@@ -24,6 +25,7 @@ export default function AdminAgentGroupDetailCard() {
 
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [agentCreateOpen, setAgentCreateOpen] = useState(false);
+  const [editAgentId, setEditAgentId] = useState<string | null>(null);
 
   const {
     data: groupDetailData,
@@ -127,6 +129,10 @@ export default function AdminAgentGroupDetailCard() {
               isGroupSelected={!!group}
               isRemoving={updateGroupMembersMutation.isPending}
               onRemoveMember={handleRemoveMember}
+              onMemberRowClick={(agentId) => {
+                setAgentCreateOpen(false);
+                setEditAgentId(agentId);
+              }}
             />
           </div>
         </div>
@@ -138,17 +144,32 @@ export default function AdminAgentGroupDetailCard() {
           isGroupDetailLoading={isGroupDetailLoading}
           membersSorted={membersSorted}
           onClose={resetMemberDialog}
-          onOpenAgentCreate={() => setAgentCreateOpen(true)}
+          onOpenAgentCreate={() => {
+            setEditAgentId(null);
+            setAgentCreateOpen(true);
+          }}
         />
       ) : null}
 
-      {agentCreateOpen ? (
+      {agentCreateOpen || editAgentId != null ? (
         <AdminAgentCreateForm
+          key={editAgentId ?? "create"}
           open
-          onOpenChange={setAgentCreateOpen}
+          editAgentId={editAgentId}
+          onOpenChange={(next) => {
+            if (!next) {
+              setAgentCreateOpen(false);
+              setEditAgentId(null);
+            }
+          }}
           defaultGroupId={selectedGroupId}
           onSuccess={() => {
             void queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            if (selectedGroupId) {
+              void queryClient.invalidateQueries({
+                queryKey: agentGroupKeys.detail(selectedGroupId),
+              });
+            }
           }}
         />
       ) : null}

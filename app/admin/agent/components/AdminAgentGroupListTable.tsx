@@ -35,13 +35,11 @@ export default function AdminAgentGroupListTable({
             error !== null &&
             "message" in error &&
             typeof (error as { message?: unknown }).message === "string"
-          ? (error as { message?: string }).message ?? "알 수 없는 오류"
+          ? ((error as { message?: string }).message ?? "알 수 없는 오류")
           : "알 수 없는 오류";
 
     return (
-      <div className="px-4 py-6 text-sm text-red-400">
-        그룹 목록 조회에 실패했습니다: {message}
-      </div>
+      <div className="px-4 py-6 text-sm text-red-400">그룹 목록 조회에 실패했습니다: {message}</div>
     );
   }
 

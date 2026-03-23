@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import AdminInput from "../../components/AdminInput";
 import AdminModalDialog from "../../components/AdminModalDialog";
 import AdminTextarea from "../../components/AdminTextarea";
+import AdminInlineLoading from "../../components/AdminInlineLoading";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,160 +21,54 @@ import {
 } from "@/components/ui/select";
 import { AGENT_GROUP_LIST_SELECT_TAKE } from "@/lib/constants/agentGroupList";
 import { useAgentGroupListQuery } from "@/lib/queries/agent-group";
-import type { AgentCreateDto } from "@/lib/types/agent";
+import { useAgentDetailQuery, useUpdateAgentMutation } from "@/lib/queries/agent";
+import type { AgentCreateDto, AgentDetail, AgentUpdateDto } from "@/lib/types/agent";
 import { useCreate } from "@refinedev/core";
+import {
+  AGENT_FORM_ROWS,
+  GROUP_SELECT_NONE,
+  type AgentCreateTextKey,
+  type AgentFormRow,
+  type TextFieldRow,
+  getInitialAgentForm,
+} from "./agentFormConfig";
 
-/** AgentCreateDto 문자열 입력 키 (provider·groupId 제외 — groupId는 Select) */
-type AgentCreateTextKey = keyof Pick<
-  AgentCreateDto,
-  "name" | "description" | "rolePrompt" | "taskPrompt" | "outputPrompt" | "modelId"
->;
-
-type TextFieldRow = {
-  kind: "text";
-  key: AgentCreateTextKey;
-  variant: "input" | "textarea";
-  label: string;
-  placeholder: string;
-  required?: boolean;
-};
-
-type ProviderRow = { kind: "provider" };
-type GroupSelectRow = { kind: "groupSelect" };
-
-type AgentCreateFormRow = TextFieldRow | ProviderRow | GroupSelectRow;
-
-const GROUP_SELECT_NONE = "__none__";
-
-/**
- * AgentCreateDto 필드 순서: 텍스트 → provider → modelId → 그룹 Select
- */
-const AGENT_CREATE_FORM_ROWS: AgentCreateFormRow[] = [
-  {
-    kind: "text",
-    key: "name",
-    variant: "input",
-    label: "에이전트 이름",
-    placeholder: "에이전트 이름을 입력하세요",
-    required: true,
-  },
-  {
-    kind: "text",
-    key: "description",
-    variant: "textarea",
-    label: "설명",
-    placeholder: "에이전트에 대한 설명을 입력하세요",
-    required: true,
-  },
-  {
-    kind: "text",
-    key: "rolePrompt",
-    variant: "textarea",
-    label: "Role Prompt",
-    placeholder: "에이전트의 역할을 설명하는 시스템 프롬프트",
-    required: true,
-  },
-  {
-    kind: "text",
-    key: "taskPrompt",
-    variant: "textarea",
-    label: "Task Prompt",
-    placeholder: "에이전트가 수행해야 할 작업에 대한 프롬프트",
-    required: true,
-  },
-  {
-    kind: "text",
-    key: "outputPrompt",
-    variant: "textarea",
-    label: "Output Prompt",
-    placeholder: "에이전트 출력 형식을 정의하는 프롬프트",
-    required: true,
-  },
-  { kind: "provider" },
-  {
-    kind: "text",
-    key: "modelId",
-    variant: "input",
-    label: "Model ID",
-    placeholder: "사용할 모델 ID를 입력하세요",
-    required: true,
-  },
-  { kind: "groupSelect" },
-];
-
-function getInitialForm(): AgentCreateDto {
+function detailToForm(d: AgentDetail): AgentCreateDto {
+  const p = d.provider;
+  const provider: AgentCreateDto["provider"] = p === "XAI" || p === "GEMINI" ? p : "GEMINI";
   return {
-    name: "",
-    description: "",
-    rolePrompt: "",
-    taskPrompt: "",
-    outputPrompt: "",
-    provider: "GEMINI",
-    modelId: "gemini-1.5-flash",
+    name: d.name ?? "",
+    description: d.description ?? "",
+    rolePrompt: d.rolePrompt ?? "",
+    taskPrompt: d.taskPrompt ?? "",
+    outputPrompt: d.outputPrompt ?? "",
+    provider,
+    modelId: d.modelId ?? "",
     groupId: undefined,
   };
 }
 
-interface AdminAgentCreateFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
-  /** 열릴 때 그룹 ID를 미리 채움 (예: 선택된 에이전트 그룹) */
-  defaultGroupId?: string | null;
-}
+type AgentFormFieldsProps = {
+  form: AgentCreateDto;
+  setForm: Dispatch<SetStateAction<AgentCreateDto>>;
+  rows: AgentFormRow[];
+  groups: { id: string; name: string }[];
+  isGroupListLoading: boolean;
+  isGroupListError: boolean;
+};
 
-export default function AdminAgentCreateForm({
-  open,
-  onOpenChange,
-  onSuccess,
-  defaultGroupId,
-}: AdminAgentCreateFormProps) {
-  const { mutate, mutation } = useCreate();
-
-  const {
-    data: groupListData,
-    isLoading: isGroupListLoading,
-    isError: isGroupListError,
-  } = useAgentGroupListQuery({ page: 1, take: AGENT_GROUP_LIST_SELECT_TAKE }, { enabled: open });
-
-  const groups = groupListData?.data ?? [];
-
-  const [form, setForm] = useState<AgentCreateDto>(() => ({
-    ...getInitialForm(),
-    groupId: defaultGroupId?.trim() ? defaultGroupId.trim() : undefined,
-  }));
-
+function AgentFormFields({
+  form,
+  setForm,
+  rows,
+  groups,
+  isGroupListLoading,
+  isGroupListError,
+}: AgentFormFieldsProps) {
   const handleChange =
     (field: AgentCreateTextKey) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev: AgentCreateDto) => ({
-        ...prev,
-        [field]: e.target.value,
-      }));
+      setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const values: AgentCreateDto = {
-      ...form,
-      groupId: form.groupId?.trim() || undefined,
-    };
-
-    mutate(
-      {
-        resource: "agents",
-        values,
-      },
-      {
-        onSuccess: () => {
-          onSuccess();
-          onOpenChange(false);
-        },
-      },
-    );
-  };
-
-  const isSubmitting = mutation.isPending;
 
   const renderTextField = (field: TextFieldRow) => {
     const raw = form[field.key];
@@ -199,7 +100,7 @@ export default function AdminAgentCreateForm({
             value={selectValue}
             disabled={isGroupListLoading}
             onValueChange={(value) =>
-              setForm((prev: AgentCreateDto) => ({
+              setForm((prev) => ({
                 ...prev,
                 groupId: value === GROUP_SELECT_NONE ? undefined : (value as string),
               }))
@@ -226,7 +127,7 @@ export default function AdminAgentCreateForm({
     );
   };
 
-  const renderRow = (row: AgentCreateFormRow, index: number) => {
+  const renderRow = (row: AgentFormRow, index: number) => {
     if (row.kind === "provider") {
       return (
         <div key={`provider-${index}`} className="flex flex-col gap-2">
@@ -234,7 +135,7 @@ export default function AdminAgentCreateForm({
           <Select
             value={form.provider}
             onValueChange={(value) =>
-              setForm((prev: AgentCreateDto) => ({
+              setForm((prev) => ({
                 ...prev,
                 provider: value as AgentCreateDto["provider"],
               }))
@@ -244,7 +145,7 @@ export default function AdminAgentCreateForm({
               <SelectValue placeholder="Provider를 선택하세요" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="GEMINAI">재미나이</SelectItem>
+              <SelectItem value="GEMINI">재미나이</SelectItem>
               <SelectItem value="XAI">그록</SelectItem>
             </SelectContent>
           </Select>
@@ -257,7 +158,170 @@ export default function AdminAgentCreateForm({
     return renderTextField(row);
   };
 
+  return <>{rows.map((row, i) => renderRow(row, i))}</>;
+}
+
+const EDIT_FORM_ROWS = AGENT_FORM_ROWS.filter((r) => r.kind !== "groupSelect");
+
+type AdminAgentCreateFormProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+  defaultGroupId?: string | null;
+  /** 설정 시 수정 모드(상세 조회 후 폼). 소속 그룹 필드는 표시하지 않음. */
+  editAgentId?: string | null;
+};
+
+function AdminAgentEditFormBody({
+  agentId,
+  initialForm,
+  onSuccess,
+  onCancel,
+}: {
+  agentId: string;
+  initialForm: AgentCreateDto;
+  onSuccess: () => void;
+  onCancel: () => void;
+}) {
+  const updateMutation = useUpdateAgentMutation();
+  const [form, setForm] = useState<AgentCreateDto>(initialForm);
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const body: AgentUpdateDto = {
+      name: form.name,
+      description: form.description,
+      rolePrompt: form.rolePrompt,
+      taskPrompt: form.taskPrompt,
+      outputPrompt: form.outputPrompt,
+      provider: form.provider,
+      modelId: form.modelId,
+    };
+
+    updateMutation.mutate(
+      { id: agentId, body },
+      {
+        onSuccess: () => {
+          onSuccess();
+        },
+      },
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <AgentFormFields
+        form={form}
+        setForm={setForm}
+        rows={EDIT_FORM_ROWS}
+        groups={[]}
+        isGroupListLoading={false}
+        isGroupListError={false}
+      />
+
+      <div className="flex justify-end gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={updateMutation.isPending}
+        >
+          취소
+        </Button>
+        <Button type="submit" disabled={updateMutation.isPending}>
+          {updateMutation.isPending ? "저장 중…" : "수정"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export default function AdminAgentCreateForm({
+  open,
+  onOpenChange,
+  onSuccess,
+  defaultGroupId,
+  editAgentId = null,
+}: AdminAgentCreateFormProps) {
+  const isEdit = Boolean(editAgentId);
+  const detailQuery = useAgentDetailQuery(editAgentId ?? "", open && isEdit);
+
+  const { mutate, mutation } = useCreate();
+
+  const {
+    data: groupListData,
+    isLoading: isGroupListLoading,
+    isError: isGroupListError,
+  } = useAgentGroupListQuery(
+    { page: 1, take: AGENT_GROUP_LIST_SELECT_TAKE },
+    { enabled: open && !isEdit },
+  );
+
+  const groups = groupListData?.data ?? [];
+
+  const [form, setForm] = useState<AgentCreateDto>(() => getInitialAgentForm(defaultGroupId));
+
+  const handleCreateSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const values: AgentCreateDto = {
+      ...form,
+      groupId: form.groupId?.trim() || undefined,
+    };
+
+    mutate(
+      {
+        resource: "agents",
+        values,
+      },
+      {
+        onSuccess: () => {
+          onSuccess();
+          onOpenChange(false);
+        },
+      },
+    );
+  };
+
   if (!open) return null;
+
+  const handleEditDone = () => {
+    onSuccess();
+    onOpenChange(false);
+  };
+
+  if (isEdit) {
+    const agent = detailQuery.data?.data;
+    const detailError = detailQuery.isError;
+    const detailLoading = detailQuery.isPending || detailQuery.isFetching;
+
+    return (
+      <AdminModalDialog
+        title="에이전트 수정"
+        subtitle="서버에서 불러온 값을 수정한 뒤 저장합니다."
+        onClose={() => onOpenChange(false)}
+      >
+        {!editAgentId ? (
+          <p className="text-muted-foreground text-sm">에이전트를 선택해 주세요.</p>
+        ) : detailError ? (
+          <p className="text-destructive text-sm">
+            에이전트 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+        ) : detailLoading || !agent ? (
+          <AdminInlineLoading label="에이전트 상세를 불러오는 중…" className="min-h-[240px]" />
+        ) : (
+          <AdminAgentEditFormBody
+            key={agent.id}
+            agentId={editAgentId}
+            initialForm={detailToForm(agent)}
+            onSuccess={handleEditDone}
+            onCancel={() => onOpenChange(false)}
+          />
+        )}
+      </AdminModalDialog>
+    );
+  }
 
   return (
     <AdminModalDialog
@@ -265,12 +329,19 @@ export default function AdminAgentCreateForm({
       subtitle="먼저 에이전트 그룹을 만든 뒤, 생성한 에이전트를 그룹 멤버로 추가하세요."
       onClose={() => onOpenChange(false)}
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {AGENT_CREATE_FORM_ROWS.map((row, i) => renderRow(row, i))}
+      <form onSubmit={handleCreateSubmit} className="space-y-4">
+        <AgentFormFields
+          form={form}
+          setForm={setForm}
+          rows={AGENT_FORM_ROWS}
+          groups={groups}
+          isGroupListLoading={isGroupListLoading}
+          isGroupListError={isGroupListError}
+        />
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "생성 중..." : "생성하기"}
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? "생성 중..." : "생성하기"}
           </Button>
         </div>
       </form>

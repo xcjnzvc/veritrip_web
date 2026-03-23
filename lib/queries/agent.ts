@@ -21,10 +21,14 @@ import { agentKeys } from "../queryKeys/agent";
 // -------------
 
 // 에이전트 목록 조회
-export const useAgentListQuery = (params: AgentListQuery) => {
+export const useAgentListQuery = (
+  params: AgentListQuery,
+  options?: { enabled?: boolean },
+) => {
   return useQuery<AgentListResponse>({
     queryKey: agentKeys.list(params),
     queryFn: () => fetchAgents(params),
+    enabled: options?.enabled ?? true,
   });
 };
 

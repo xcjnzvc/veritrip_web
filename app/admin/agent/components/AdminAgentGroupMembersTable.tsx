@@ -3,7 +3,7 @@
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { Bot, Trash2 } from "lucide-react";
 import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
-import AdminLoadingUI from "../../components/AdminLoadingUI";
+import AdminInlineLoading from "../../components/AdminInlineLoading";
 import { adminTw } from "../../components/styles";
 
 interface AdminAgentGroupMembersTableProps {
@@ -26,21 +26,7 @@ export default function AdminAgentGroupMembersTable({
   onRemoveMember,
 }: AdminAgentGroupMembersTableProps) {
   if (isLoading) {
-    return (
-      <AdminLoadingUI
-        active={isLoading}
-        progressTitle="그룹 정보를 불러오는 중"
-        statusLoadingMessages={[
-          "멤버 데이터를 동기화하는 중...",
-          "권한 및 역할을 계산하는 중...",
-          "라우팅 키워드를 확인하는 중...",
-          "그룹 구성을 정리하는 중...",
-          "표시 상태를 준비하는 중...",
-        ]}
-        statusDoneText="멤버 정보를 불러왔습니다!"
-        showDoneOverlay={false}
-      />
-    );
+    return <AdminInlineLoading label="그룹·멤버 정보를 불러오는 중…" />;
   }
 
   if (isError) {

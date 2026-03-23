@@ -3,6 +3,7 @@
 import type { AgentGroup } from "@/lib/types/agent-group";
 import { Bot } from "lucide-react";
 import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
+import AdminInlineLoading from "../../components/AdminInlineLoading";
 import { adminTw } from "../../components/styles";
 
 interface AdminAgentGroupListTableProps {
@@ -23,7 +24,7 @@ export default function AdminAgentGroupListTable({
   onSelectGroupId,
 }: AdminAgentGroupListTableProps) {
   if (isLoading) {
-    return <div className="text-muted-foreground px-4 py-6 text-sm">로딩 중...</div>;
+    return <AdminInlineLoading label="그룹 목록을 불러오는 중…" />;
   }
 
   if (isError) {

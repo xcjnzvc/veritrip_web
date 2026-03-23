@@ -29,6 +29,7 @@ export interface AgentCreateDto {
   outputPrompt: string;
   provider: "XAI" | "GEMINAI";
   modelId: string;
+  groupId?: string;
 }
 
 // 수정은 일부 필드만 선택적으로 들어갈 수 있도록 부분 타입으로 정의

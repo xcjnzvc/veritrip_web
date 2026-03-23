@@ -1,19 +1,12 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userInfo } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
-
-const LoginModal = dynamic(() => import("@/app/main/_components/LoginModal"), {
-  ssr: false,
-});
-import { adminTw } from "./components/styles";
 import AdminPageHeader from "./components/AdminPageHeader";
+import { adminTw } from "./components/styles";
 
 export default function AdminPage() {
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { accessToken } = useAuthStore();
   const isLoggedIn = !!accessToken;
 
@@ -27,18 +20,7 @@ export default function AdminPage() {
 
   return (
     <div className={adminTw.page}>
-      <div className={adminTw.rowBetween}>
-        <AdminPageHeader title="Admin Page" />
-        {!isLoggedIn && (
-          <button
-            type="button"
-            className="rounded-full bg-[#222222] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#111111]"
-            onClick={() => setIsLoginModalOpen(true)}
-          >
-            로그인
-          </button>
-        )}
-      </div>
+      <AdminPageHeader title="Admin Page" />
 
       {!isLoggedIn && (
         <p className={adminTw.infoText}>관리자 정보를 보려면 먼저 로그인해 주세요.</p>
@@ -68,8 +50,6 @@ export default function AdminPage() {
           </p>
         </div>
       )}
-
-      {isLoginModalOpen && <LoginModal onClose={() => setIsLoginModalOpen(false)} />}
     </div>
   );
 }

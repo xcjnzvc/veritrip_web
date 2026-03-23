@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
-import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "react-hot-toast";
 import Header from "@/components/Header";
 import Providers from "@/components/Providers"; // ✅ 추가
@@ -33,14 +32,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" className={cn("font-sans", pretendard.variable)}>
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
         <Providers>
-          {" "}
-          {/* ✅ 추가 */}
           <AuthProvider>
             <Header />
             {children}
           </AuthProvider>
-        </Providers>{" "}
-        {/* ✅ 추가 */}
+        </Providers>
         <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>

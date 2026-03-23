@@ -1,19 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import LoginModal from "@/app/main/_components/LoginModal";
 import Image from "next/image";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import UserInfoBox from "@/app/main/_components/UserInfo";
-import ProgressBar from "@/app/survey/_components/ProgressBar";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
+  const pathname = usePathname();
   const { accessToken, user } = useAuthStore();
   // const { step } = useSurveyStore();
   const isLoggedIn = !!accessToken;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userInfo, setUserInfo] = useState(false);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   // const totalSteps = surveyMockData.steps.length;
 

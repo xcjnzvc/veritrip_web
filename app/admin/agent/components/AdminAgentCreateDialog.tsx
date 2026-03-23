@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  useEffect,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -24,6 +26,11 @@ import { useAgentGroupListQuery } from "@/lib/queries/agent-group";
 import { useAgentDetailQuery, useUpdateAgentMutation } from "@/lib/queries/agent";
 import type { AgentCreateDto, AgentDetail, AgentUpdateDto } from "@/lib/types/agent";
 import { useCreate } from "@refinedev/core";
+import rehypePrettyCode from "rehype-pretty-code";
+import rehypeStringify from "rehype-stringify";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import { unified } from "unified";
 import {
   AGENT_FORM_ROWS,
   GROUP_SELECT_NONE,
@@ -32,6 +39,89 @@ import {
   type TextFieldRow,
   getInitialAgentForm,
 } from "./agentFormConfig";
+
+const AGENT_MODAL_MAX_HEIGHT_CLASS = "max-h-[85vh] overflow-hidden";
+const AGENT_MODAL_BODY_SCROLL_CLASS = "max-h-[calc(85vh-120px)] overflow-y-auto pr-1";
+
+type OutputPromptEditorProps = {
+  label: string;
+  placeholder: string;
+  value: string;
+  required?: boolean;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
+};
+
+function OutputPromptEditor({ label, placeholder, value, required, onChange }: OutputPromptEditorProps) {
+  const [highlightedHtml, setHighlightedHtml] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const highlightRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const renderHighlighted = async () => {
+      try {
+        const markdown = ["```markdown", value || " ", "```"].join("\n");
+        const file = await unified()
+          .use(remarkParse)
+          .use(remarkRehype)
+          .use(rehypePrettyCode, {
+            theme: "dark-plus",
+            keepBackground: true,
+          })
+          .use(rehypeStringify)
+          .process(markdown);
+
+        if (isMounted) {
+          setHighlightedHtml(String(file));
+        }
+      } catch {
+        if (isMounted) {
+          setHighlightedHtml("");
+        }
+      }
+    };
+
+    renderHighlighted();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [value]);
+
+  const syncScroll = () => {
+    const textarea = textareaRef.current;
+    const highlight = highlightRef.current;
+    if (!textarea || !highlight) return;
+    highlight.scrollTop = textarea.scrollTop;
+    highlight.scrollLeft = textarea.scrollLeft;
+  };
+
+  return (
+    <div className="group flex w-full flex-col gap-2">
+      <span className="group-focus-within:text-primary text-sm font-semibold transition-colors">{label}</span>
+      <div className="relative min-h-[240px] overflow-hidden rounded-md border border-[#3c3c3c] bg-[#1e1e1e] focus-within:border-[#007acc]">
+        <div
+          ref={highlightRef}
+          className="pointer-events-none absolute inset-0 overflow-auto px-3 py-3 text-[13px] leading-6 [&_code]:font-mono [&_pre]:m-0 [&_pre]:min-h-[240px] [&_pre]:bg-transparent [&_pre]:p-0"
+          dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+        />
+        <AdminTextarea
+          ref={textareaRef}
+          label=""
+          value={value}
+          required={required}
+          placeholder={placeholder}
+          onChange={onChange}
+          onScroll={syncScroll}
+          spellCheck={false}
+          className="relative z-10 max-h-[360px] min-h-[240px] resize-y overflow-auto border-0 bg-transparent px-3 py-3 font-mono text-[13px] leading-6 text-transparent caret-[#aeafad] [tab-size:2] placeholder:text-[#6a9955] selection:bg-[#264f78]/80 focus-visible:ring-0"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">rehype-pretty-code로 하이라이트되는 Dark+ 코드 블럭 에디터입니다.</p>
+    </div>
+  );
+}
 
 function detailToForm(d: AgentDetail): AgentCreateDto {
   const p = d.provider;
@@ -83,6 +173,18 @@ function AgentFormFields({
 
     if (field.variant === "input") {
       return <AdminInput key={field.key} {...common} />;
+    }
+    if (field.key === "outputPrompt") {
+      return (
+        <OutputPromptEditor
+          key={field.key}
+          label={common.label}
+          placeholder={common.placeholder}
+          value={value}
+          required={common.required}
+          onChange={handleChange(field.key)}
+        />
+      );
     }
     return <AdminTextarea key={field.key} {...common} />;
   };
@@ -301,24 +403,27 @@ export default function AdminAgentCreateForm({
         title="에이전트 수정"
         subtitle="서버에서 불러온 값을 수정한 뒤 저장합니다."
         onClose={() => onOpenChange(false)}
+        className={AGENT_MODAL_MAX_HEIGHT_CLASS}
       >
-        {!editAgentId ? (
-          <p className="text-muted-foreground text-sm">에이전트를 선택해 주세요.</p>
-        ) : detailError ? (
-          <p className="text-destructive text-sm">
-            에이전트 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
-          </p>
-        ) : detailLoading || !agent ? (
-          <AdminInlineLoading label="에이전트 상세를 불러오는 중…" className="min-h-[240px]" />
-        ) : (
-          <AdminAgentEditFormBody
-            key={agent.id}
-            agentId={editAgentId}
-            initialForm={detailToForm(agent)}
-            onSuccess={handleEditDone}
-            onCancel={() => onOpenChange(false)}
-          />
-        )}
+        <div className={AGENT_MODAL_BODY_SCROLL_CLASS}>
+          {!editAgentId ? (
+            <p className="text-muted-foreground text-sm">에이전트를 선택해 주세요.</p>
+          ) : detailError ? (
+            <p className="text-destructive text-sm">
+              에이전트 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+            </p>
+          ) : detailLoading || !agent ? (
+            <AdminInlineLoading label="에이전트 상세를 불러오는 중…" className="min-h-[240px]" />
+          ) : (
+            <AdminAgentEditFormBody
+              key={agent.id}
+              agentId={editAgentId}
+              initialForm={detailToForm(agent)}
+              onSuccess={handleEditDone}
+              onCancel={() => onOpenChange(false)}
+            />
+          )}
+        </div>
       </AdminModalDialog>
     );
   }
@@ -328,23 +433,26 @@ export default function AdminAgentCreateForm({
       title="에이전트 생성"
       subtitle="먼저 에이전트 그룹을 만든 뒤, 생성한 에이전트를 그룹 멤버로 추가하세요."
       onClose={() => onOpenChange(false)}
+      className={AGENT_MODAL_MAX_HEIGHT_CLASS}
     >
-      <form onSubmit={handleCreateSubmit} className="space-y-4">
-        <AgentFormFields
-          form={form}
-          setForm={setForm}
-          rows={AGENT_FORM_ROWS}
-          groups={groups}
-          isGroupListLoading={isGroupListLoading}
-          isGroupListError={isGroupListError}
-        />
+      <div className={AGENT_MODAL_BODY_SCROLL_CLASS}>
+        <form onSubmit={handleCreateSubmit} className="space-y-4">
+          <AgentFormFields
+            form={form}
+            setForm={setForm}
+            rows={AGENT_FORM_ROWS}
+            groups={groups}
+            isGroupListLoading={isGroupListLoading}
+            isGroupListError={isGroupListError}
+          />
 
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? "생성 중..." : "생성하기"}
-          </Button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? "생성 중..." : "생성하기"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </AdminModalDialog>
   );
 }

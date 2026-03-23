@@ -12,11 +12,14 @@ export const useSilentRefresh = () => {
         setLogin(session.accessToken);
         setUserInfo(session.user);
       } catch {
-        // console.log("refresh 실패했지만 로그아웃 안 함");
+        // refresh 실패 시 인증 정보만 초기화하고 앱 렌더링은 계속 진행
         setLogout();
+      } finally {
+        // 첫 인증 시도 완료 후 렌더링 허용
+        setAuthReady(true);
       }
     };
 
     refresh();
-  }, []);
+  }, [setAuthReady, setLogin, setLogout, setUserInfo]);
 };

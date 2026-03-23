@@ -13,6 +13,7 @@ export const useSilentRefresh = () => {
         setLogin(newAccessToken); // accessToken만 Zustand에 저장
         // refreshToken은 백엔드가 쿠키로 알아서 갱신해줌!
       } catch {
+        // console.log("refresh 실패했지만 로그아웃 안 함");
         setLogout();
       }
     };

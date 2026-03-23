@@ -61,3 +61,7 @@ Your goal is to write clean, maintainable, and highly optimized code following b
 - Use try-catch blocks for async operations.
 - Show user-friendly toast messages or error boundaries instead of raw error logs.
 - Log critical errors to the console with clear context.
+
+# Create commit message
+
+- Simply create a commit message. In Korean

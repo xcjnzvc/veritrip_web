@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { useEffect } from "react";
 
 export const useSilentRefresh = () => {
-  const { setLogin, setUserInfo, setAuthReady } = useAuthStore();
+  const { setLogin, setUserInfo, setLogout, setAuthReady } = useAuthStore();
 
   useEffect(() => {
     const refresh = async () => {

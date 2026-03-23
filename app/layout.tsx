@@ -4,11 +4,8 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import QueryProvider from "@/components/QueryProvider";
 import { Toaster } from "react-hot-toast";
-import ConditionalHeader from "@/components/ConditionalHeader";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+import Header from "@/components/Header";
+import Providers from "@/components/Providers"; // ✅ 추가
 
 const pretendard = localFont({
   src: [
@@ -34,12 +31,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={cn("font-sans", geist.variable)}>
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
-        <AuthProvider>
-          <ConditionalHeader />
-
-          <QueryProvider>{children}</QueryProvider>
-        </AuthProvider>
-
+        <Providers>
+          {" "}
+          {/* ✅ 추가 */}
+          <AuthProvider>
+            <Header />
+            {children}
+          </AuthProvider>
+        </Providers>{" "}
+        {/* ✅ 추가 */}
         <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>

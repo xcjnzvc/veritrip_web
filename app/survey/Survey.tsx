@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { surveyMockData } from "@/lib/survey.mock";
 import SurveyTitle from "./_components/SurveyTitle";
 import SurveyContent from "./_components/SurveyContent";
 import Button from "../main/_components/Button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSurvey, submitSurvey } from "@/lib/api/survey";
+import { useQuery } from "@tanstack/react-query";
 
-// step별 쿼리 키 매핑
 const STEP_KEY: Record<number, string> = {
   1: "destination",
   2: "duration",
@@ -17,25 +17,59 @@ const STEP_KEY: Record<number, string> = {
   6: "travelStyle",
 };
 
+interface SurveyResponse {
+  totalSteps: number;
+  steps: SurveyStep[];
+}
+
+export interface SurveyStep {
+  orderNumber: number;
+  title: string;
+  description?: string;
+  type: "single_select" | "multi_select";
+  options: SurveyOption[];
+}
+
+export interface SurveyOption {
+  id: string;
+  label: string;
+  children?: SurveyOption[];
+}
+
 export default function Survey() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const step = Number(searchParams.get("step") ?? "1");
 
-  const currentStep = surveyMockData.steps.find((s) => s.id === step);
-  const totalSteps = surveyMockData.steps.length;
+  const {
+    data: surveyData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["survey"],
+    queryFn: async () => {
+      const res = await getSurvey();
+      return res.data.data;
+    },
+  });
 
+  console.log("surveyData", surveyData);
+
+  const currentStep = surveyData?.steps.find(
+    (s: SurveyStep) => s.orderNumber === step,
+  );
+  const totalSteps = surveyData?.totalSteps;
+
+  if (isLoading) return <div>로딩 중...</div>;
+  if (isError) return <div>에러가 발생했습니다.</div>;
   if (!currentStep) return null;
 
-  // ✅ 선택값을 URL 쿼리에서 읽기
   const key = STEP_KEY[step];
   const rawValue = searchParams.get(key) ?? "";
   const selected = rawValue ? rawValue.split(",") : [];
 
-  // ✅ 클릭 시 URL 쿼리에 바로 반영
   const handleSelected = (name: string) => {
     const params = new URLSearchParams(searchParams.toString());
-
     if (currentStep.type === "multi_select") {
       const next = selected.includes(name)
         ? selected.filter((item) => item !== name)
@@ -44,26 +78,31 @@ export default function Survey() {
     } else {
       params.set(key, name);
     }
-
     router.replace(`/survey?${params.toString()}`);
   };
 
   const handleNextAction = async () => {
-    const params = new URLSearchParams(searchParams.toString());
-
     if (step === totalSteps) {
-      // ✅ 마지막 스텝이면 API 호출
+      const params = new URLSearchParams(searchParams.toString());
+
+      // URL 쿼리스트링에서 값 꺼내서 백엔드 형식으로 변환
       const payload = {
-        destination: params.get("destination"),
-        duration: params.get("duration"),
-        companion: params.get("companion"),
-        theme: params.get("theme")?.split(","),
-        dislike: params.get("dislike"),
-        travelStyle: params.get("travelStyle"),
+        typeId: 1,
+        answers: [
+          { answer: params.get("destination"), orderNumber: 1 },
+          { answer: params.get("duration"), orderNumber: 2 },
+          { answer: params.get("companion"), orderNumber: 3 },
+          { answer: params.get("theme"), orderNumber: 4 },
+          { answer: params.get("dislike"), orderNumber: 5 },
+          { answer: params.get("travelStyle"), orderNumber: 6 },
+        ],
       };
+
       console.log("🚀 백엔드로 보낼 최종 데이터:", payload);
-      // await api.post('/survey', payload);
+      await submitSurvey(payload); // ← 여기서 API 호출
+      router.push("/result"); // ← 결과 페이지로 이동
     } else {
+      const params = new URLSearchParams(searchParams.toString());
       params.set("step", String(step + 1));
       router.push(`/survey?${params.toString()}`);
     }
@@ -86,21 +125,26 @@ export default function Survey() {
       </button>
 
       <SurveyTitle
-        step={currentStep.id}
-        totalSteps={totalSteps}
+        step={currentStep.orderNumber}
+        totalSteps={totalSteps ?? 6}
         title={currentStep.title}
         description={currentStep.description}
       />
 
       <div className="flex flex-col gap-[70px] mt-[70px] mb-[140px]">
-        {currentStep.options.some((opt) => "children" in opt) ? (
+        {currentStep.options.some(
+          (opt: SurveyOption) => opt.children && opt.children.length > 0,
+        ) ? (
           currentStep.options.map(
-            (option) =>
-              "children" in option && (
+            (option: SurveyOption) =>
+              option.children &&
+              option.children.length > 0 && (
                 <SurveyContent
                   key={option.id}
                   title={option.label}
-                  badges={option.children.map((child) => child.label)}
+                  badges={option.children.map(
+                    (child: SurveyOption) => child.label,
+                  )}
                   onSelected={handleSelected}
                   selected={selected}
                 />
@@ -110,7 +154,9 @@ export default function Survey() {
           <SurveyContent
             onSelected={handleSelected}
             selected={selected}
-            badges={currentStep.options.map((option) => option.label)}
+            badges={currentStep.options.map(
+              (option: SurveyOption) => option.label,
+            )}
           />
         )}
       </div>

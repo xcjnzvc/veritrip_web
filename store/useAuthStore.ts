@@ -5,8 +5,10 @@ import { persist } from "zustand/middleware"; // 1. persist 임포트
 interface AuthState {
   accessToken: string | null;
   user: User | null;
+  isAuthReady: boolean;
   setUserInfo: (userData: User) => void;
   setLogin: (accessToken: string) => void;
+  setAuthReady: (ready: boolean) => void;
   setLogout: () => void;
 }
 
@@ -16,8 +18,10 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       accessToken: null,
       user: null,
+      isAuthReady: false,
       setLogin: (accessToken) => set({ accessToken }),
       setUserInfo: (userData) => set({ user: userData }),
+      setAuthReady: (ready) => set({ isAuthReady: ready }),
       setLogout: () => set({ accessToken: null, user: null }), // 로그아웃 시 둘 다 초기화
     }),
     {

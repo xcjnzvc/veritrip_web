@@ -5,6 +5,7 @@ import AuthProvider from "@/components/AuthProvider";
 import { Toaster } from "react-hot-toast";
 import Header from "@/components/Header";
 import Providers from "@/components/Providers"; // ✅ 추가
+import { cn } from "@/lib/utils";
 
 const pretendard = localFont({
   src: [
@@ -26,23 +27,16 @@ export const metadata: Metadata = {
   description: "VERITRIP에 대한 소개",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={cn("font-sans", pretendard.variable)}>
       <body className={`${pretendard.variable} font-pretendard antialiased`}>
         <Providers>
-          {" "}
-          {/* ✅ 추가 */}
           <AuthProvider>
             <Header />
             {children}
           </AuthProvider>
-        </Providers>{" "}
-        {/* ✅ 추가 */}
+        </Providers>
         <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>

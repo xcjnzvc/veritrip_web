@@ -32,12 +32,7 @@ export default function Button({
 
   return (
     <div
-      className={`
-        ${selectedStyle}
-        relative w-full flex items-center justify-center px-4 py-4 rounded-xl 
-        transition-opacity hover:opacity-90 shadow-sm
-        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-      `}
+      className={` ${selectedStyle} relative flex w-full items-center justify-center rounded-xl px-4 py-4 shadow-sm transition-opacity hover:opacity-90 ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} `}
       onClick={disabled ? undefined : onClick}
     >
       {route && (

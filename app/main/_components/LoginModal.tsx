@@ -6,9 +6,8 @@ import LoginInput from "./LoginInput";
 import Button from "./Button";
 import Divider from "./Divider";
 import Checkbox from "./Checkbox";
-import { loginUser, signin, userInfo } from "@/lib/api/auth";
+import { loginUser, refreshSession, signin } from "@/lib/api/auth";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
@@ -20,7 +19,6 @@ interface ApiErrorResponse {
 
 export default function LoginModal({ onClose }: { onClose: () => void }) {
   const { setLogin, setUserInfo } = useAuthStore();
-  const router = useRouter();
 
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,12 +47,20 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           localStorage.removeItem("savedEmail");
         }
 
-        setLogin(result.data.accessToken);
-        const userRes = await userInfo();
-        setUserInfo(userRes.data);
+        // 실무형 세션 고정: 로그인 직후 쿠키 기반 refresh로 accessToken/user를 재동기화한다.
+        try {
+          const session = await refreshSession();
+          setLogin(session.accessToken);
+          setUserInfo(session.user);
+        } catch {
+          // refresh 동기화 실패 시 로그인 응답 accessToken을 최소한으로 반영
+          if (result?.data?.accessToken) {
+            setLogin(result.data.accessToken);
+          }
+        }
 
         toast.success("로그인이 완료되었습니다!");
-        router.push("/main");
+        // router.push("/main");
         onClose();
       }
     } catch (error: unknown) {
@@ -93,11 +99,11 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
       onClick={onClose}
     >
       <div
-        className={`relative pt-[66px] pb-[30px] px-[50px] max-w-[500px] w-full flex flex-col items-center rounded-2xl transition-colors duration-300 ${
+        className={`relative flex w-full max-w-[500px] flex-col items-center rounded-2xl px-[50px] pt-[66px] pb-[30px] transition-colors duration-300 ${
           isLoginMode ? "bg-white" : "bg-[#1A1A1A]"
         }`}
         onClick={(e) => e.stopPropagation()}
@@ -107,13 +113,13 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           alt="cancel"
           width={20}
           height={20}
-          className={`absolute top-[20px] right-[20px] cursor-pointer z-[60] ${
-            !isLoginMode ? "invert brightness-200" : ""
+          className={`absolute top-[20px] right-[20px] z-60 cursor-pointer ${
+            !isLoginMode ? "brightness-200 invert" : ""
           }`}
           onClick={onClose}
         />
 
-        <div className="flex flex-col gap-[30px] w-full items-center">
+        <div className="flex w-full flex-col items-center gap-[30px]">
           {/* 헤더 로고 섹션 */}
           <div className="text-center">
             <h2
@@ -121,15 +127,13 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
             >
               VERITRIP
             </h2>
-            <p
-              className={`text-[14px] ${isLoginMode ? "text-[#999]" : "text-[#828282]"}`}
-            >
+            <p className={`text-[14px] ${isLoginMode ? "text-[#999]" : "text-[#828282]"}`}>
               지금 바로 VERITRIP의 특별한 여정에 합류하세요.
             </p>
           </div>
 
           {/* 입력 섹션 */}
-          <div className="flex flex-col gap-[14px] w-full">
+          <div className="flex w-full flex-col gap-[14px]">
             {!isLoginMode && (
               <LoginInput
                 placeholder="이름"
@@ -153,22 +157,20 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
             />
 
             <Button
-              text={
-                isLoading ? "연결 중..." : isLoginMode ? "로그인" : "가입하기"
-              }
+              text={isLoading ? "연결 중..." : isLoginMode ? "로그인" : "가입하기"}
               color="메인" // ✅ "로그인" → "메인"으로 변경
               onClick={isLoginMode ? handleLogin : handleSignUp}
               disabled={isLoading}
             />
 
             {isLoginMode && (
-              <div className="flex justify-between items-center px-1">
+              <div className="flex items-center justify-between px-1">
                 <Checkbox
                   label="이메일 저장"
                   checked={isRemember}
                   onChange={() => setIsRemember(!isRemember)}
                 />
-                <p className="text-[14px] text-[#999] cursor-pointer hover:underline">
+                <p className="cursor-pointer text-[14px] text-[#999] hover:underline">
                   비밀번호 찾기
                 </p>
               </div>
@@ -178,7 +180,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           <Divider />
 
           {/* 소셜 로그인 섹션 */}
-          <div className="flex flex-col gap-[10px] w-full">
+          <div className="flex w-full flex-col gap-[10px]">
             <Button
               text="Google로 계속하기" // ✅ text 그대로 출력되므로 변경 없음
               color="구글"
@@ -189,12 +191,10 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
           {/* 하단 모드 전환 섹션 */}
           <div className="flex gap-[6px] text-[14px]">
             <span className={isLoginMode ? "text-[#999]" : "text-[#828282]"}>
-              {isLoginMode
-                ? "아직 VERITRIP 회원이 아니신가요?"
-                : "이미 VERITRIP 회원이신가요?"}
+              {isLoginMode ? "아직 VERITRIP 회원이 아니신가요?" : "이미 VERITRIP 회원이신가요?"}
             </span>
             <p
-              className={`font-bold cursor-pointer hover:underline ${
+              className={`cursor-pointer font-bold hover:underline ${
                 isLoginMode ? "text-[#5E0E8C]" : "text-white"
               }`}
               onClick={() => setIsLoginMode(!isLoginMode)}

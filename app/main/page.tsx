@@ -24,22 +24,17 @@ export default function MainPageContent() {
     // 로그인 되어 있으면 아무 처리 안 함 (기본 input 기능 동작)
   };
 
-  const tagKeyWords = [
-    "실시간 핫플레이스",
-    "느좋 카페",
-    "꼭 가봐야할 명소",
-    "맛집 탐방",
-  ];
+  const tagKeyWords = ["실시간 핫플레이스", "느좋 카페", "꼭 가봐야할 명소", "맛집 탐방"];
 
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="flex min-h-screen flex-col">
       {/* <Header /> */}
       {/* 1. justify-center를 빼고 pt-[20vh]를 줬습니다.
         2. 20vh는 화면 높이의 20%만큼 위에서 띄운다는 뜻이라, 
            완전 중앙보다 살짝 위에 위치하게 되어 시각적으로 더 안정적입니다.
       */}
-      <section className="flex-1 flex flex-col items-center pt-[30vh] px-[40px] ">
-        <div className="flex flex-col items-center gap-[16px] w-full">
+      <section className="flex flex-1 flex-col items-center px-[40px] pt-[30vh]">
+        <div className="flex w-full flex-col items-center gap-[16px]">
           <h1 className="text-[28px] text-[#222]">
             {isLoggedIn ? (
               <>
@@ -62,10 +57,7 @@ export default function MainPageContent() {
           ) : (
             <p className="text-[14px] text-[#999]">
               현재 체험판을 이용중이므로{" "}
-              <a
-                href="/recommend"
-                className="text-[#666] text-[14px] font-semibold underline"
-              >
+              <a href="/recommend" className="text-[14px] font-semibold text-[#666] underline">
                 바로 추천받기
               </a>
               만 가능합니다.
@@ -82,9 +74,7 @@ export default function MainPageContent() {
       )}
 
       {/* 3. 기존 로그인 모달 */}
-      {isLoginModalOpen && (
-        <LoginModal onClose={() => setIsLoginModalOpen(false)} />
-      )}
+      {isLoginModalOpen && <LoginModal onClose={() => setIsLoginModalOpen(false)} />}
     </main>
   );
 }

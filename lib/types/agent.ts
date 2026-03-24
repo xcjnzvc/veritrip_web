@@ -51,12 +51,19 @@ export type AgentUpdateDto = Partial<
   >
 >;
 
+/** POST /mgmt/agents/:id/run 요청 본문 */
 export interface AgentRunDto {
-  // TODO: AgentRunDto 필드를 백엔드와 맞게 정의
-  [key: string]: unknown;
+  prompt: string;
+  useGoogleSearch?: boolean;
 }
 
-export type AgentRunResponse = ApiResponseWithData<unknown>;
+/** 실행 응답의 data 필드 */
+export interface AgentRunResultData {
+  text: string;
+  sources: Record<string, unknown>[];
+}
+
+export type AgentRunResponse = ApiResponseWithData<AgentRunResultData>;
 
 export interface AiProvider {
   XAI: "XAI";

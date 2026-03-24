@@ -41,18 +41,3 @@ export const deleteAgentGroup = async (id: string): Promise<ApiResponse> => {
   const response = await axiosInstance.delete<ApiResponse>(`/mgmt/agent-groups/${id}`);
   return response.data;
 };
-
-/**
- * 그룹 멤버 삭제
- * endpoint: DELETE /mgmt/agent-groups/:id/members/:agentId
- * 주의: 현재 백엔드 파라미터명이 `agentId`지만 실제로는 그룹 멤버 row의 id를 받습니다.
- */
-export const deleteAgentGroupMember = async (
-  id: string,
-  agentId: string,
-): Promise<ApiResponse> => {
-  const response = await axiosInstance.delete<ApiResponse>(
-    `/mgmt/agent-groups/${id}/members/${agentId}`,
-  );
-  return response.data;
-};

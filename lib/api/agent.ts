@@ -17,6 +17,7 @@ export type {
   AgentListResponse,
   AgentRunDto,
   AgentRunResponse,
+  AgentRunResultData,
   AgentUpdateDto,
 } from "../types/agent";
 

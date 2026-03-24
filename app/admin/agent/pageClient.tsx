@@ -10,11 +10,13 @@ import AdminAgentGroupListCard from "./components/AdminAgentGroupListCard";
 export type AgentPageClientProps = {
   initialGroupList?: AgentGroupListResponse;
   initialGroupListUpdatedAt?: number;
+  geminiModelIds: string[];
 };
 
 export default function AgentPageClient({
   initialGroupList,
   initialGroupListUpdatedAt,
+  geminiModelIds,
 }: AgentPageClientProps) {
   return (
     <AgentGroupPageProvider>
@@ -29,7 +31,7 @@ export default function AgentPageClient({
             initialGroupList={initialGroupList}
             initialGroupListUpdatedAt={initialGroupListUpdatedAt}
           />
-          <AdminAgentGroupDetailCard />
+          <AdminAgentGroupDetailCard geminiModelIds={geminiModelIds} />
         </div>
       </div>
     </AgentGroupPageProvider>

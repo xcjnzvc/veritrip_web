@@ -3,18 +3,17 @@ import {
   AgentGroupDetailResponse,
   AgentGroupListResponse,
   createAgentGroup,
-  deleteAgentGroupMember,
   deleteAgentGroup,
-  fetchAgentGroups,
   fetchAgentGroupDetail,
+  fetchAgentGroups,
   updateAgentGroup,
 } from "../api/agent-group";
+import { agentGroupKeys } from "../queryKeys/agent-group";
 import type {
   AgentGroupCreateDto,
   AgentGroupListQuery,
   AgentGroupUpdateDto,
 } from "../types/agent-group";
-import { agentGroupKeys } from "../queryKeys/agent-group";
 
 export const useAgentGroupListQuery = (
   params: AgentGroupListQuery,
@@ -38,7 +37,8 @@ export const useAgentGroupListQuery = (
 export const useAgentGroupDetailQuery = (id: string | null, enabled = true) => {
   return useQuery<AgentGroupDetailResponse>({
     queryKey: agentGroupKeys.detail(id ?? ""),
-    queryFn: () => (id ? fetchAgentGroupDetail(id) : Promise.reject(new Error("Group id is empty"))),
+    queryFn: () =>
+      id ? fetchAgentGroupDetail(id) : Promise.reject(new Error("Group id is empty")),
     enabled: enabled && !!id,
   });
 };
@@ -58,7 +58,8 @@ export const useUpdateAgentGroupMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: AgentGroupUpdateDto }) => updateAgentGroup(id, body),
+    mutationFn: ({ id, body }: { id: string; body: AgentGroupUpdateDto }) =>
+      updateAgentGroup(id, body),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.details() });
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(variables.id) });
@@ -76,17 +77,3 @@ export const useDeleteAgentGroupMutation = () => {
     },
   });
 };
-
-export const useDeleteAgentGroupMemberMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, agentId }: { id: string; agentId: string }) =>
-      deleteAgentGroupMember(id, agentId),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(variables.id) });
-    },
-  });
-};
-

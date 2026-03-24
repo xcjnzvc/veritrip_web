@@ -5,4 +5,3 @@ export const agentGroupKeys = {
   details: () => [...agentGroupKeys.all, "detail"] as const,
   detail: (id: string) => [...agentGroupKeys.details(), id] as const,
 };
-

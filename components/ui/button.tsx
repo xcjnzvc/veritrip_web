@@ -11,6 +11,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        /** 주요 액션(실행 등) — 기본 primary보다 그림자·링으로 강조 */
+        primary:
+          "bg-primary text-primary-foreground font-semibold shadow-md shadow-primary/25 ring-2 ring-primary/30 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/35 hover:ring-primary/45 [a]:hover:bg-primary/90",
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:

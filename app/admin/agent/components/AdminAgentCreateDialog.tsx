@@ -56,6 +56,7 @@ type AgentFormFieldsProps = {
   setForm: Dispatch<SetStateAction<AgentCreateDto>>;
   rows: AgentFormRow[];
   groups: { id: string; name: string }[];
+  geminiModelIds: string[];
   isGroupListLoading: boolean;
   isGroupListError: boolean;
 };
@@ -65,6 +66,7 @@ function AgentFormFields({
   setForm,
   rows,
   groups,
+  geminiModelIds,
   isGroupListLoading,
   isGroupListError,
 }: AgentFormFieldsProps) {
@@ -161,6 +163,47 @@ function AgentFormFields({
     if (row.kind === "groupSelect") {
       return renderGroupSelect(index);
     }
+    if (row.kind === "text" && row.key === "modelId") {
+      if (form.provider !== "GEMINI") {
+        return renderTextField(row);
+      }
+
+      const hasModels = geminiModelIds.length > 0;
+      const selectValue = form.modelId?.trim() ? form.modelId : undefined;
+
+      return (
+        <div key={`model-${index}`} className="flex flex-col gap-2">
+          <span className="text-sm font-semibold">Model ID</span>
+          <Select
+            value={hasModels ? selectValue : undefined}
+            disabled={!hasModels}
+            onValueChange={(value) => setForm((prev) => ({ ...prev, modelId: value ?? "" }))}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue
+                placeholder={
+                  hasModels ? "Gemini 모델을 선택하세요" : "Gemini 모델 목록을 불러오지 못했습니다"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {hasModels
+                ? geminiModelIds.map((modelId) => (
+                    <SelectItem key={modelId} value={modelId}>
+                      {modelId}
+                    </SelectItem>
+                  ))
+                : null}
+            </SelectContent>
+          </Select>
+          {!hasModels ? (
+            <p className="text-muted-foreground text-xs">
+              서버에서 모델 목록을 받아오지 못해 선택이 비활성화되었습니다.
+            </p>
+          ) : null}
+        </div>
+      );
+    }
     return renderTextField(row);
   };
 
@@ -171,6 +214,7 @@ const EDIT_FORM_ROWS = AGENT_FORM_ROWS.filter((r) => r.kind !== "groupSelect");
 
 type AdminAgentCreateFormProps = {
   open: boolean;
+  geminiModelIds: string[];
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
   defaultGroupId?: string | null;
@@ -181,11 +225,13 @@ type AdminAgentCreateFormProps = {
 function AdminAgentEditFormBody({
   agentId,
   initialForm,
+  geminiModelIds,
   onSuccess,
   onCancel,
 }: {
   agentId: string;
   initialForm: AgentCreateDto;
+  geminiModelIds: string[];
   onSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -222,6 +268,7 @@ function AdminAgentEditFormBody({
         setForm={setForm}
         rows={EDIT_FORM_ROWS}
         groups={[]}
+        geminiModelIds={geminiModelIds}
         isGroupListLoading={false}
         isGroupListError={false}
       />
@@ -245,6 +292,7 @@ function AdminAgentEditFormBody({
 
 export default function AdminAgentCreateForm({
   open,
+  geminiModelIds,
   onOpenChange,
   onSuccess,
   defaultGroupId,
@@ -359,6 +407,7 @@ export default function AdminAgentCreateForm({
               key={agent.id}
               agentId={editAgentId}
               initialForm={detailToForm(agent)}
+              geminiModelIds={geminiModelIds}
               onSuccess={handleEditDone}
               onCancel={() => onOpenChange(false)}
             />
@@ -382,6 +431,7 @@ export default function AdminAgentCreateForm({
             setForm={setForm}
             rows={AGENT_FORM_ROWS}
             groups={groups}
+            geminiModelIds={geminiModelIds}
             isGroupListLoading={isGroupListLoading}
             isGroupListError={isGroupListError}
           />

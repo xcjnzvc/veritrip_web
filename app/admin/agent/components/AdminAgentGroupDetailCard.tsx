@@ -1,32 +1,45 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { AgentGroupDetailResponse, AgentGroupListResponse } from "@/lib/api/agent-group";
+import type { AgentGroupMemberUpdateDto } from "@/lib/api/agent-group-member";
+import { useAgentGroupDetailQuery, useDeleteAgentGroupMutation } from "@/lib/queries/agent-group";
+import {
+  useDeleteAgentGroupMemberMutation,
+  useUpdateAgentGroupMemberMutation,
+} from "@/lib/queries/agent-group-member";
 import { agentKeys } from "@/lib/queryKeys/agent";
 import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
-import {
-  useAgentGroupDetailQuery,
-  useDeleteAgentGroupMemberMutation,
-  useDeleteAgentGroupMutation,
-} from "@/lib/queries/agent-group";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminCardSectionHeader from "../../components/AdminCardSectionHeader";
 import { adminTw } from "../../components/styles";
-import { useAgentGroupPage } from "./AgentGroupPageContext";
 import AdminAgentCreateForm from "./AdminAgentCreateDialog";
 import AdminAgentGroupAddMemberDialog from "./AdminAgentGroupAddMemberDialog";
+import AdminAgentGroupMemberAssignRoleDialog from "./AdminAgentGroupMemberAssignRoleDialog";
 import AdminAgentGroupMembersTable from "./AdminAgentGroupMembersTable";
+import AdminAgentRunDialog from "./AdminAgentRunDialog";
+import { useAgentGroupPage } from "./AgentGroupPageContext";
+import {
+  applyOptimisticRemoveGroupMember,
+  invalidateGroupMemberQueries,
+  rollbackOptimisticRemoveGroupMember,
+} from "./agentGroupMemberOptimistic";
 
-export default function AdminAgentGroupDetailCard() {
+type AdminAgentGroupDetailCardProps = {
+  geminiModelIds: string[];
+};
+
+export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgentGroupDetailCardProps) {
   const queryClient = useQueryClient();
   const { selectedGroupId, setSelectedGroupId } = useAgentGroupPage();
 
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
   const [agentCreateOpen, setAgentCreateOpen] = useState(false);
   const [editAgentId, setEditAgentId] = useState<string | null>(null);
+  const [assignRoleMember, setAssignRoleMember] = useState<AgentGroupMember | null>(null);
+  const [runAgentMember, setRunAgentMember] = useState<AgentGroupMember | null>(null);
 
   const {
     data: groupDetailData,
@@ -42,6 +55,7 @@ export default function AdminAgentGroupDetailCard() {
   }, [group?.members]);
 
   const deleteGroupMemberMutation = useDeleteAgentGroupMemberMutation();
+  const updateGroupMemberMutation = useUpdateAgentGroupMemberMutation();
   const deleteGroupMutation = useDeleteAgentGroupMutation();
 
   const resetMemberDialog = () => {
@@ -50,45 +64,11 @@ export default function AdminAgentGroupDetailCard() {
 
   const handleRemoveMember = (groupId: string, agentId: string) => {
     if (!selectedGroupId || selectedGroupId !== groupId) return;
-
-    const previousGroupLists = queryClient.getQueriesData<AgentGroupListResponse>({
-      queryKey: agentGroupKeys.lists(),
+    const snapshot = applyOptimisticRemoveGroupMember({
+      queryClient,
+      groupId: selectedGroupId,
+      agentId,
     });
-    const previousGroupDetail = queryClient.getQueryData<AgentGroupDetailResponse>(
-      agentGroupKeys.detail(selectedGroupId),
-    );
-
-    queryClient.setQueriesData<AgentGroupListResponse>(
-      { queryKey: agentGroupKeys.lists() },
-      (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          data: old.data.map((g) => {
-            if (g.id !== selectedGroupId) return g;
-            if (!Array.isArray(g.members)) return g;
-            return {
-              ...g,
-              members: g.members.slice(0, Math.max(0, g.members.length - 1)),
-            };
-          }),
-        };
-      },
-    );
-
-    queryClient.setQueryData<AgentGroupDetailResponse>(
-      agentGroupKeys.detail(selectedGroupId),
-      (old) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: {
-            ...old.data,
-            members: (old.data.members ?? []).filter((m) => m.agentId !== agentId),
-          },
-        };
-      },
-    );
 
     deleteGroupMemberMutation.mutate(
       {
@@ -97,16 +77,14 @@ export default function AdminAgentGroupDetailCard() {
       },
       {
         onError: () => {
-          for (const [queryKey, data] of previousGroupLists) {
-            queryClient.setQueryData(queryKey, data);
-          }
-          if (previousGroupDetail) {
-            queryClient.setQueryData(agentGroupKeys.detail(selectedGroupId), previousGroupDetail);
-          }
+          rollbackOptimisticRemoveGroupMember({
+            queryClient,
+            groupId: selectedGroupId,
+            snapshot,
+          });
         },
         onSettled: () => {
-          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
-          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(selectedGroupId) });
+          invalidateGroupMemberQueries({ queryClient, groupId: selectedGroupId });
         },
       },
     );
@@ -119,6 +97,20 @@ export default function AdminAgentGroupDetailCard() {
     const id = selectedGroupId;
     setSelectedGroupId(null);
     deleteGroupMutation.mutate(id);
+  };
+
+  const handleSubmitAssignRole = (payload: AgentGroupMemberUpdateDto) => {
+    updateGroupMemberMutation.mutate(payload, {
+      onSuccess: () => {
+        setAssignRoleMember(null);
+      },
+      onSettled: () => {
+        void queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+        if (selectedGroupId) {
+          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(selectedGroupId) });
+        }
+      },
+    });
   };
 
   return (
@@ -176,6 +168,8 @@ export default function AdminAgentGroupDetailCard() {
               isGroupSelected={!!group}
               isRemoving={deleteGroupMemberMutation.isPending}
               onRemoveMember={handleRemoveMember}
+              onAssignRole={(member) => setAssignRoleMember(member)}
+              onRunAgent={(member) => setRunAgentMember(member)}
               onMemberRowClick={(agentId) => {
                 setAgentCreateOpen(false);
                 setEditAgentId(agentId);
@@ -202,6 +196,7 @@ export default function AdminAgentGroupDetailCard() {
         <AdminAgentCreateForm
           key={editAgentId ?? "create"}
           open
+          geminiModelIds={geminiModelIds}
           editAgentId={editAgentId}
           onOpenChange={(next) => {
             if (!next) {
@@ -218,6 +213,24 @@ export default function AdminAgentGroupDetailCard() {
               });
             }
           }}
+        />
+      ) : null}
+
+      {assignRoleMember ? (
+        <AdminAgentGroupMemberAssignRoleDialog
+          member={assignRoleMember}
+          isSubmitting={updateGroupMemberMutation.isPending}
+          onClose={() => setAssignRoleMember(null)}
+          onSubmit={handleSubmitAssignRole}
+        />
+      ) : null}
+
+      {runAgentMember ? (
+        <AdminAgentRunDialog
+          key={runAgentMember.agentId}
+          agentId={runAgentMember.agentId}
+          agentLabel={runAgentMember.agent?.name ?? runAgentMember.agentId}
+          onClose={() => setRunAgentMember(null)}
         />
       ) : null}
     </>

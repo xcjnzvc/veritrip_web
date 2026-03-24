@@ -1,8 +1,16 @@
 import { Suspense } from "react";
 import AdminRouteLoadingUI from "../components/AdminRouteLoadingUI";
 import AgentPageContent from "./AgentPageContent";
+import { fetchGeminiModelsServer } from "@/lib/server/fetchGeminiModelsServer";
 
-export default function AgentPage() {
+export default async function AgentPage() {
+  let geminiModelIds: string[] = [];
+  try {
+    geminiModelIds = await fetchGeminiModelsServer();
+  } catch {
+    geminiModelIds = [];
+  }
+
   return (
     <Suspense
       fallback={
@@ -16,7 +24,7 @@ export default function AgentPage() {
         />
       }
     >
-      <AgentPageContent />
+      <AgentPageContent geminiModelIds={geminiModelIds} />
     </Suspense>
   );
 }

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { Bot, Trash2 } from "lucide-react";
+import AdminTableCell from "../../components/AdminTableCell";
 import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
 import AdminInlineLoading from "../../components/AdminInlineLoading";
 import { adminTw } from "../../components/styles";
@@ -15,6 +16,8 @@ interface AdminAgentGroupMembersTableProps {
   isGroupSelected: boolean;
   isRemoving: boolean;
   onRemoveMember: (groupId: string, agentId: string) => void;
+  onAssignRole: (member: AgentGroupMember) => void;
+  onRunAgent: (member: AgentGroupMember) => void;
   onMemberRowClick?: (agentId: string) => void;
 }
 
@@ -26,6 +29,8 @@ export default function AdminAgentGroupMembersTable({
   isGroupSelected,
   isRemoving,
   onRemoveMember,
+  onAssignRole,
+  onRunAgent,
   onMemberRowClick,
 }: AdminAgentGroupMembersTableProps) {
   if (isLoading) {
@@ -74,7 +79,8 @@ export default function AdminAgentGroupMembersTable({
     { key: "agent", header: "에이전트", width: "30%" },
     { key: "role", header: "역할", width: "15%" },
     { key: "routingKeywords", header: "라우팅 키워드", width: "25%" },
-    { key: "action", header: "액션", width: "20%", align: "right" },
+    { key: "model", header: "모델", width: "25%" },
+    { key: "action", header: "액션", width: "28%", align: "right" },
   ];
 
   return (
@@ -85,40 +91,67 @@ export default function AdminAgentGroupMembersTable({
       onRowClick={onMemberRowClick ? (m) => onMemberRowClick(m.agentId) : undefined}
       renderRowCells={(m) => (
         <>
-          <td className={adminTw.tableCellMono}>{m.order}</td>
-          <td className={adminTw.tableCellStrong}>
+          <AdminTableCell type="mono">{m.order}</AdminTableCell>
+          <AdminTableCell type="strong">
             <div className="flex flex-col">
               <span className="font-medium">{m.agent?.name ?? m.agentId}</span>
               <span className="text-muted-foreground text-[11px]">{m.agentId}</span>
             </div>
-          </td>
-          <td className={adminTw.tableCell}>
+          </AdminTableCell>
+          <AdminTableCell type="default">
             {m.role ? (
               <span className={adminTw.providerBadge}>{m.role}</span>
             ) : (
               <span className="text-muted-foreground text-xs">-</span>
             )}
-          </td>
-          <td className={adminTw.tableCell}>
+          </AdminTableCell>
+          <AdminTableCell type="default">
             <span className="text-muted-foreground text-xs">{m.routerKeywords || "-"}</span>
-          </td>
-          <td className={adminTw.tableCell} style={{ textAlign: "right" }}>
-            <Button
-              size="sm"
-              type="button"
-              variant="destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                const ok = window.confirm("멤버를 제거할까요?");
-                if (!ok) return;
-                onRemoveMember(m.groupId, m.agentId);
-              }}
-              disabled={isRemoving}
-            >
-              <Trash2 className="size-4" />
-              제거
-            </Button>
-          </td>
+          </AdminTableCell>
+          <AdminTableCell type="default">
+            {m.agent?.modelId?.split("/").pop() || "-"}
+          </AdminTableCell>
+          <AdminTableCell type="actionRight">
+            <div className="flex flex-wrap items-center justify-end gap-1">
+              <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAssignRole(m);
+                }}
+              >
+                역할 부여
+              </Button>
+              <Button
+                size="sm"
+                type="button"
+                variant="secondary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRunAgent(m);
+                }}
+              >
+                실행
+              </Button>
+              <Button
+                size="sm"
+                type="button"
+                variant="destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const ok = window.confirm("멤버를 제거할까요?");
+                  if (!ok) return;
+                  onRemoveMember(m.groupId, m.agentId);
+                }}
+                disabled={isRemoving}
+              >
+                <Trash2 className="size-4" />
+                제거
+              </Button>
+            </div>
+          </AdminTableCell>
         </>
       )}
     />

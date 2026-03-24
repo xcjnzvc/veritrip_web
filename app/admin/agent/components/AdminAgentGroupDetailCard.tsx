@@ -104,13 +104,16 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
       onSuccess: () => {
         setAssignRoleMember(null);
       },
-      onSettled: () => {
-        void queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
-        if (selectedGroupId) {
-          void queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(selectedGroupId) });
-        }
-      },
     });
+  };
+
+  const handleReorderMembers = (updates: AgentGroupMemberUpdateDto[]) => {
+    if (updates.length === 0) return;
+
+    Promise.all(updates.map((payload) => updateGroupMemberMutation.mutateAsync(payload)))
+      .catch(() => {
+        // 낙관적 순서 적용 상태를 유지하며, 실패 시에도 리스트 재호출은 하지 않습니다.
+      });
   };
 
   return (
@@ -170,6 +173,8 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
               onRemoveMember={handleRemoveMember}
               onAssignRole={(member) => setAssignRoleMember(member)}
               onRunAgent={(member) => setRunAgentMember(member)}
+              onReorderMembers={handleReorderMembers}
+              isReordering={updateGroupMemberMutation.isPending}
               onMemberRowClick={(agentId) => {
                 setAgentCreateOpen(false);
                 setEditAgentId(agentId);

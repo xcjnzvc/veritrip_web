@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminTw } from "./styles";
@@ -34,6 +34,21 @@ export default function AdminModalDialog({
   withBackdrop = true,
   className,
 }: AdminModalDialogProps) {
+  useEffect(() => {
+    if (!onClose) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
   const card = (
     <div className={cn(adminTw.modalCard, className)}>
       <div className="mb-4 flex items-start justify-between gap-4">

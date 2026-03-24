@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import type { AgentGroupMemberUpdateDto } from "@/lib/api/agent-group-member";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
+import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { Bot, Trash2 } from "lucide-react";
-import AdminTableCell from "../../components/AdminTableCell";
-import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
+import { useEffect, useState } from "react";
 import AdminInlineLoading from "../../components/AdminInlineLoading";
-import { adminTw } from "../../components/styles";
 
 interface AdminAgentGroupMembersTableProps {
   membersSorted: AgentGroupMember[];
@@ -18,6 +18,8 @@ interface AdminAgentGroupMembersTableProps {
   onRemoveMember: (groupId: string, agentId: string) => void;
   onAssignRole: (member: AgentGroupMember) => void;
   onRunAgent: (member: AgentGroupMember) => void;
+  onReorderMembers: (updates: AgentGroupMemberUpdateDto[]) => void;
+  isReordering?: boolean;
   onMemberRowClick?: (agentId: string) => void;
 }
 
@@ -31,8 +33,16 @@ export default function AdminAgentGroupMembersTable({
   onRemoveMember,
   onAssignRole,
   onRunAgent,
+  onReorderMembers,
+  isReordering = false,
   onMemberRowClick,
 }: AdminAgentGroupMembersTableProps) {
+  const [boardMembers, setBoardMembers] = useState<AgentGroupMember[]>(membersSorted);
+
+  useEffect(() => {
+    setBoardMembers(membersSorted);
+  }, [membersSorted]);
+
   if (isLoading) {
     return <AdminInlineLoading label="그룹·멤버 정보를 불러오는 중…" />;
   }
@@ -74,86 +84,107 @@ export default function AdminAgentGroupMembersTable({
     );
   }
 
-  const columns: AdminTableColumn[] = [
-    { key: "order", header: "순서", width: "10%" },
-    { key: "agent", header: "에이전트", width: "30%" },
-    { key: "role", header: "역할", width: "15%" },
-    { key: "routingKeywords", header: "라우팅 키워드", width: "25%" },
-    { key: "model", header: "모델", width: "25%" },
-    { key: "action", header: "액션", width: "28%", align: "right" },
-  ];
+  const handleDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    if (source.index === destination.index) return;
+
+    const next = [...boardMembers];
+    const [moved] = next.splice(source.index, 1);
+    if (!moved) return;
+    next.splice(destination.index, 0, moved);
+    const nextWithOrder = next.map((member, idx) => ({ ...member, order: idx }));
+    setBoardMembers(nextWithOrder);
+
+    onReorderMembers(
+      nextWithOrder.map((member) => ({
+        groupId: member.groupId,
+        agentId: member.agentId,
+        order: member.order,
+      })),
+    );
+  };
 
   return (
-    <AdminDataTable
-      columns={columns}
-      rows={membersSorted}
-      getRowKey={(m) => m.id}
-      onRowClick={onMemberRowClick ? (m) => onMemberRowClick(m.agentId) : undefined}
-      renderRowCells={(m) => (
-        <>
-          <AdminTableCell type="mono">{m.order}</AdminTableCell>
-          <AdminTableCell type="strong">
-            <div className="flex flex-col">
-              <span className="font-medium">{m.agent?.name ?? m.agentId}</span>
-              <span className="text-muted-foreground text-[11px]">{m.agentId}</span>
-            </div>
-          </AdminTableCell>
-          <AdminTableCell type="default">
-            {m.role ? (
-              <span className={adminTw.providerBadge}>{m.role}</span>
-            ) : (
-              <span className="text-muted-foreground text-xs">-</span>
-            )}
-          </AdminTableCell>
-          <AdminTableCell type="default">
-            <span className="text-muted-foreground text-xs">{m.routerKeywords || "-"}</span>
-          </AdminTableCell>
-          <AdminTableCell type="default">
-            {m.agent?.modelId?.split("/").pop() || "-"}
-          </AdminTableCell>
-          <AdminTableCell type="actionRight">
-            <div className="flex flex-wrap items-center justify-end gap-1">
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAssignRole(m);
-                }}
-              >
-                역할 부여
-              </Button>
-              <Button
-                size="sm"
-                type="button"
-                variant="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRunAgent(m);
-                }}
-              >
-                실행
-              </Button>
-              <Button
-                size="sm"
-                type="button"
-                variant="destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const ok = window.confirm("멤버를 제거할까요?");
-                  if (!ok) return;
-                  onRemoveMember(m.groupId, m.agentId);
-                }}
-                disabled={isRemoving}
-              >
-                <Trash2 className="size-4" />
-                제거
-              </Button>
-            </div>
-          </AdminTableCell>
-        </>
-      )}
-    />
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <Droppable droppableId="members">
+        {(droppableProvided) => (
+          <div
+            ref={droppableProvided.innerRef}
+            {...droppableProvided.droppableProps}
+            className="min-h-12 space-y-2"
+          >
+            {boardMembers.map((m, index) => (
+              <Draggable key={m.id} draggableId={m.id} index={index}>
+                {(draggableProvided) => (
+                  <div
+                    ref={draggableProvided.innerRef}
+                    {...draggableProvided.draggableProps}
+                    {...(!isReordering ? draggableProvided.dragHandleProps : {})}
+                    className="bg-card border-border rounded-md border p-3"
+                    onClick={() => onMemberRowClick?.(m.agentId)}
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{m.agent?.name ?? m.agentId}</p>
+                        <p className="text-muted-foreground truncate text-[11px]">{m.agentId}</p>
+                      </div>
+                      <span className="text-muted-foreground text-xs">#{m.order}</span>
+                    </div>
+                    <p className="text-muted-foreground mb-1 text-xs">역할: {m.role || "-"}</p>
+                    <p className="text-muted-foreground mb-1 text-xs">
+                      키워드: {m.routerKeywords || "-"}
+                    </p>
+                    <p className="text-muted-foreground mb-3 text-xs">
+                      모델: {m.agent?.modelId?.split("/").pop() || "-"}
+                    </p>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      <Button
+                        size="sm"
+                        type="button"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAssignRole(m);
+                        }}
+                      >
+                        역할 부여
+                      </Button>
+                      <Button
+                        size="sm"
+                        type="button"
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRunAgent(m);
+                        }}
+                      >
+                        실행
+                      </Button>
+                      <Button
+                        size="sm"
+                        type="button"
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const ok = window.confirm("멤버를 제거할까요?");
+                          if (!ok) return;
+                          onRemoveMember(m.groupId, m.agentId);
+                        }}
+                        disabled={isRemoving}
+                      >
+                        <Trash2 className="size-4" />
+                        제거
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {droppableProvided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 }

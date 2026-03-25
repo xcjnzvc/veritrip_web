@@ -5,6 +5,7 @@ const bgStyles: Record<string, string> = {
   네이버: "bg-[#03C75A] text-white",
   구글: "bg-white border border-[#ddd] text-gray-700",
   메인: "bg-[#5E0E8C] text-white",
+  회색: "bg-[#ddd] text-[#666]",
 };
 
 interface ButtonProps {

@@ -1,4 +1,4 @@
-import Image from "next/image"; // Image 컴포넌트 추가
+import Image from "next/image"; 
 import Button from "./Button";
 
 interface AccessModalProps {

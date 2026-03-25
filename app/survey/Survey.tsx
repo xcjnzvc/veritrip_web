@@ -55,9 +55,7 @@ export default function Survey() {
 
   console.log("surveyData", surveyData);
 
-  const currentStep = surveyData?.steps.find(
-    (s: SurveyStep) => s.orderNumber === step,
-  );
+  const currentStep = surveyData?.steps.find((s: SurveyStep) => s.orderNumber === step);
   const totalSteps = surveyData?.totalSteps;
 
   if (isLoading) return <div>로딩 중...</div>;
@@ -99,8 +97,8 @@ export default function Survey() {
       };
 
       console.log("🚀 백엔드로 보낼 최종 데이터:", payload);
-      await submitSurvey(payload); // ← 여기서 API 호출
-      router.push("/result"); // ← 결과 페이지로 이동
+      // await submitSurvey(payload); // ← 여기서 API 호출
+      router.push("/survey/result"); // ← 결과 페이지로 이동
     } else {
       const params = new URLSearchParams(searchParams.toString());
       params.set("step", String(step + 1));
@@ -114,14 +112,9 @@ export default function Survey() {
   };
 
   return (
-    <div className="max-w-[1000px] mx-auto">
+    <div className="mx-auto max-w-[1000px]">
       <button onClick={handlePrevAction} className="py-4">
-        <Image
-          src="/icon/arrow-bold.svg"
-          alt="arrow-left"
-          width={24}
-          height={24}
-        />
+        <Image src="/icon/arrow-bold.svg" alt="arrow-left" width={24} height={24} />
       </button>
 
       <SurveyTitle
@@ -131,38 +124,32 @@ export default function Survey() {
         description={currentStep.description}
       />
 
-      <div className="flex flex-col gap-[70px] mt-[70px] mb-[140px]">
+      <div className="mt-[70px] mb-[140px] flex flex-col gap-[70px]">
         {currentStep.options.some(
           (opt: SurveyOption) => opt.children && opt.children.length > 0,
         ) ? (
-          currentStep.options.map(
-            (option: SurveyOption) =>
-              option.children &&
-              option.children.length > 0 && (
-                <SurveyContent
-                  key={option.id}
-                  title={option.label}
-                  badges={option.children.map(
-                    (child: SurveyOption) => child.label,
-                  )}
-                  onSelected={handleSelected}
-                  selected={selected}
-                />
-              ),
-          )
+          currentStep.options
+            .filter((option: SurveyOption) => option.children && option.children.length > 0)
+            .map((option: SurveyOption) => (
+              <SurveyContent
+                key={option.id}
+                title={option.label}
+                badges={option.children!.map((child: SurveyOption) => child.label)}
+                onSelected={handleSelected}
+                selected={selected}
+              />
+            ))
         ) : (
           <SurveyContent
             onSelected={handleSelected}
             selected={selected}
-            badges={currentStep.options.map(
-              (option: SurveyOption) => option.label,
-            )}
+            badges={currentStep.options.map((option: SurveyOption) => option.label)}
           />
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="max-w-[1000px] mx-auto">
+      <div className="fixed right-0 bottom-0 left-0 z-50">
+        <div className="mx-auto max-w-[1000px]">
           <div className="bg-gradient-to-t from-white via-white to-transparent pt-[40px] pb-[40px]">
             <Button
               text={step === totalSteps ? "제출하기" : "다음"}

@@ -6,7 +6,6 @@ import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
 import { AdminHeader } from "./components/header";
 import { cn } from "@/lib/utils";
-import dataProvider from "@/lib/refine/dataProvider";
 
 interface RefineProviderProps {
   children: React.ReactNode;
@@ -15,7 +14,6 @@ interface RefineProviderProps {
 export default function RefineProvider({ children }: RefineProviderProps) {
   return (
     <Refine
-      dataProvider={{ default: dataProvider }}
       routerProvider={routerProvider}
       resources={[
         {

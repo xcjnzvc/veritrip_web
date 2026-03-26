@@ -8,7 +8,7 @@ import { Bot, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminInlineLoading from "../../components/AdminInlineLoading";
 
-interface AdminAgentGroupMembersTableProps {
+interface AdminAgentGroupMembersBoardProps {
   membersSorted: AgentGroupMember[];
   isLoading: boolean;
   isError: boolean;
@@ -23,7 +23,7 @@ interface AdminAgentGroupMembersTableProps {
   onMemberRowClick?: (agentId: string) => void;
 }
 
-export default function AdminAgentGroupMembersTable({
+export default function AdminAgentGroupMembersBoard({
   membersSorted,
   isLoading,
   isError,
@@ -36,7 +36,7 @@ export default function AdminAgentGroupMembersTable({
   onReorderMembers,
   isReordering = false,
   onMemberRowClick,
-}: AdminAgentGroupMembersTableProps) {
+}: AdminAgentGroupMembersBoardProps) {
   const [boardMembers, setBoardMembers] = useState<AgentGroupMember[]>(membersSorted);
 
   useEffect(() => {
@@ -121,61 +121,71 @@ export default function AdminAgentGroupMembersTable({
                     ref={draggableProvided.innerRef}
                     {...draggableProvided.draggableProps}
                     {...(!isReordering ? draggableProvided.dragHandleProps : {})}
-                    className="bg-card border-border rounded-md border p-3"
+                    className="bg-card border-border relative rounded-md border p-3"
                     onClick={() => onMemberRowClick?.(m.agentId)}
                   >
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{m.agent?.name ?? m.agentId}</p>
-                        <p className="text-muted-foreground truncate text-[11px]">{m.agentId}</p>
+                    <span className="text-muted-foreground absolute top-3 right-3 text-xs">
+                      #{m.order}
+                    </span>
+                    <div className="flex items-end justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-2 flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                              {m.agent?.name ?? m.agentId}
+                            </p>
+                            <p className="text-muted-foreground truncate text-[11px]">
+                              {m.agentId}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-muted-foreground mb-1 text-xs">역할: {m.role || "-"}</p>
+                        <p className="text-muted-foreground mb-1 text-xs">
+                          키워드: {m.routerKeywords || "-"}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          모델: {m.agent?.modelId?.split("/").pop() || "-"}
+                        </p>
                       </div>
-                      <span className="text-muted-foreground text-xs">#{m.order}</span>
-                    </div>
-                    <p className="text-muted-foreground mb-1 text-xs">역할: {m.role || "-"}</p>
-                    <p className="text-muted-foreground mb-1 text-xs">
-                      키워드: {m.routerKeywords || "-"}
-                    </p>
-                    <p className="text-muted-foreground mb-3 text-xs">
-                      모델: {m.agent?.modelId?.split("/").pop() || "-"}
-                    </p>
-                    <div className="flex flex-wrap justify-end gap-1">
-                      <Button
-                        size="sm"
-                        type="button"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAssignRole(m);
-                        }}
-                      >
-                        역할 부여
-                      </Button>
-                      <Button
-                        size="sm"
-                        type="button"
-                        variant="secondary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRunAgent(m);
-                        }}
-                      >
-                        실행
-                      </Button>
-                      <Button
-                        size="sm"
-                        type="button"
-                        variant="destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const ok = window.confirm("멤버를 제거할까요?");
-                          if (!ok) return;
-                          onRemoveMember(m.groupId, m.agentId);
-                        }}
-                        disabled={isRemoving}
-                      >
-                        <Trash2 className="size-4" />
-                        제거
-                      </Button>
+                      <div className="flex shrink-0 flex-wrap justify-end gap-1">
+                        <Button
+                          size="sm"
+                          type="button"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAssignRole(m);
+                          }}
+                        >
+                          역할 부여
+                        </Button>
+                        <Button
+                          size="sm"
+                          type="button"
+                          variant="secondary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRunAgent(m);
+                          }}
+                        >
+                          실행
+                        </Button>
+                        <Button
+                          size="sm"
+                          type="button"
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const ok = window.confirm("멤버를 제거할까요?");
+                            if (!ok) return;
+                            onRemoveMember(m.groupId, m.agentId);
+                          }}
+                          disabled={isRemoving}
+                        >
+                          <Trash2 className="size-4" />
+                          제거
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

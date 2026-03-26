@@ -8,34 +8,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateAgentGroupMutation } from "@/lib/queries/agent-group";
-import type { AgentGroupCreateDto, AgentGroupStrategy } from "@/lib/types/agent-group";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { useCreateAgentGroupMutation, useUpdateAgentGroupMutation } from "@/lib/queries/agent-group";
+import type { AgentGroup, AgentGroupCreateDto, AgentGroupStrategy } from "@/lib/types/agent-group";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import AdminInput from "../../components/AdminInput";
 import AdminTextarea from "../../components/AdminTextarea";
 
 interface AdminAgentGroupCreateFormProps {
   onSuccess: () => void;
+  editGroup?: AgentGroup | null;
 }
 
 const STRATEGIES: AgentGroupStrategy[] = ["SEQUENTIAL", "PARALLEL", "ROUTER"];
+type AgentGroupFormValues = Omit<AgentGroupCreateDto, "members">;
+const EMPTY_FORM_VALUES: AgentGroupFormValues = {
+  name: "",
+  description: "",
+  strategy: "SEQUENTIAL",
+  sharedContext: "",
+  synthesizePrompt: "",
+};
 
-export default function AdminAgentGroupCreateForm({ onSuccess }: AdminAgentGroupCreateFormProps) {
+const toFormValues = (group?: AgentGroup | null): AgentGroupFormValues => {
+  if (!group) return EMPTY_FORM_VALUES;
+
+  return {
+    name: group.name,
+    description: group.description ?? "",
+    strategy: group.strategy,
+    sharedContext: group.sharedContext ?? "",
+    synthesizePrompt: group.synthesizePrompt ?? "",
+  };
+};
+
+export default function AdminAgentGroupCreateForm({
+  onSuccess,
+  editGroup,
+}: AdminAgentGroupCreateFormProps) {
   const createMutation = useCreateAgentGroupMutation();
+  const updateMutation = useUpdateAgentGroupMutation();
+  const isEditMode = Boolean(editGroup?.id);
 
-  const [form, setForm] = useState<AgentGroupCreateDto>({
-    name: "",
-    description: "",
-    strategy: "SEQUENTIAL",
-    sharedContext: "",
-    synthesizePrompt: "",
-    members: [],
-  });
+  const [form, setForm] = useState<AgentGroupFormValues>(toFormValues(editGroup));
+
+  useEffect(() => {
+    setForm(toFormValues(editGroup));
+  }, [editGroup]);
 
   const handleChange =
-    (field: keyof Omit<AgentGroupCreateDto, "members">) =>
+    (field: keyof AgentGroupFormValues) =>
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setForm((prev: AgentGroupCreateDto) => ({
+      setForm((prev: AgentGroupFormValues) => ({
         ...prev,
         [field]: e.target.value,
       }));
@@ -44,14 +67,35 @@ export default function AdminAgentGroupCreateForm({ onSuccess }: AdminAgentGroup
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    createMutation.mutate(form, {
-      onSuccess: () => {
-        onSuccess();
+    if (isEditMode && editGroup?.id) {
+      updateMutation.mutate(
+        {
+          id: editGroup.id,
+          body: form,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+      return;
+    }
+
+    createMutation.mutate(
+      {
+        ...form,
+        members: [],
       },
-    });
+      {
+        onSuccess: () => {
+          onSuccess();
+        },
+      },
+    );
   };
 
-  const isSubmitting = createMutation.isPending;
+  const isSubmitting = isEditMode ? updateMutation.isPending : createMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -110,7 +154,7 @@ export default function AdminAgentGroupCreateForm({ onSuccess }: AdminAgentGroup
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "생성 중..." : "그룹 생성"}
+          {isSubmitting ? (isEditMode ? "수정 중..." : "생성 중...") : isEditMode ? "그룹 수정" : "그룹 생성"}
         </Button>
       </div>
     </form>

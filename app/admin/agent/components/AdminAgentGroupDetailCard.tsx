@@ -11,14 +11,16 @@ import { agentKeys } from "@/lib/queryKeys/agent";
 import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminCardSectionHeader from "../../components/AdminCardSectionHeader";
+import AdminModalDialog from "../../components/AdminModalDialog";
 import { adminTw } from "../../components/styles";
 import AdminAgentCreateForm from "./AdminAgentCreateDialog";
+import AdminAgentGroupCreateForm from "./AdminAgentGroupCreateForm";
 import AdminAgentGroupAddMemberDialog from "./AdminAgentGroupAddMemberDialog";
 import AdminAgentGroupMemberAssignRoleDialog from "./AdminAgentGroupMemberAssignRoleDialog";
-import AdminAgentGroupMembersTable from "./AdminAgentGroupMembersTable";
+import AdminAgentGroupMembersBoard from "./AdminAgentGroupMembersBoard";
 import AdminAgentRunDialog from "./AdminAgentRunDialog";
 import { useAgentGroupPage } from "./AgentGroupPageContext";
 import {
@@ -31,11 +33,14 @@ type AdminAgentGroupDetailCardProps = {
   geminiModelIds: string[];
 };
 
-export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgentGroupDetailCardProps) {
+export default function AdminAgentGroupDetailCard({
+  geminiModelIds,
+}: AdminAgentGroupDetailCardProps) {
   const queryClient = useQueryClient();
   const { selectedGroupId, setSelectedGroupId } = useAgentGroupPage();
 
   const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [groupEditOpen, setGroupEditOpen] = useState(false);
   const [agentCreateOpen, setAgentCreateOpen] = useState(false);
   const [editAgentId, setEditAgentId] = useState<string | null>(null);
   const [assignRoleMember, setAssignRoleMember] = useState<AgentGroupMember | null>(null);
@@ -110,10 +115,11 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
   const handleReorderMembers = (updates: AgentGroupMemberUpdateDto[]) => {
     if (updates.length === 0) return;
 
-    Promise.all(updates.map((payload) => updateGroupMemberMutation.mutateAsync(payload)))
-      .catch(() => {
+    Promise.all(updates.map((payload) => updateGroupMemberMutation.mutateAsync(payload))).catch(
+      () => {
         // 낙관적 순서 적용 상태를 유지하며, 실패 시에도 리스트 재호출은 하지 않습니다.
-      });
+      },
+    );
   };
 
   return (
@@ -151,6 +157,17 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
                 <Button
                   size="sm"
                   type="button"
+                  variant="secondary"
+                  onClick={() => setGroupEditOpen(true)}
+                  disabled={!selectedGroupId || isGroupDetailLoading}
+                >
+                  <Pencil className="size-4" />
+                  그룹 수정
+                </Button>
+
+                <Button
+                  size="sm"
+                  type="button"
                   variant="destructive"
                   onClick={handleConfirmDeleteGroup}
                   disabled={!selectedGroupId || deleteGroupMutation.isPending}
@@ -163,7 +180,7 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
           />
 
           <div className="p-4">
-            <AdminAgentGroupMembersTable
+            <AdminAgentGroupMembersBoard
               membersSorted={membersSorted}
               isLoading={isGroupDetailLoading}
               isError={isGroupDetailError}
@@ -195,6 +212,21 @@ export default function AdminAgentGroupDetailCard({ geminiModelIds }: AdminAgent
             setAgentCreateOpen(true);
           }}
         />
+      ) : null}
+
+      {groupEditOpen && group ? (
+        <AdminModalDialog
+          title="에이전트 그룹 수정"
+          onClose={() => setGroupEditOpen(false)}
+          subtitle="그룹 메타 정보를 수정합니다."
+        >
+          <AdminAgentGroupCreateForm
+            editGroup={group}
+            onSuccess={() => {
+              setGroupEditOpen(false);
+            }}
+          />
+        </AdminModalDialog>
       ) : null}
 
       {agentCreateOpen || editAgentId != null ? (

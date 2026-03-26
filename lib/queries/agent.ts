@@ -17,6 +17,7 @@ import {
   updateAgent,
 } from "../api/agent";
 import { agentKeys } from "../queryKeys/agent";
+import { toast } from "../toast";
 
 // -------------
 // Query 훅들
@@ -54,8 +55,8 @@ export const useCreateAgentMutation = () => {
   return useMutation({
     mutationFn: (body: AgentCreateDto) => createAgent(body),
     onSuccess: () => {
-      // 목록 관련 캐시 전부 무효화
       queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+      toast.success("에이전트가 생성되었습니다.");
     },
   });
 };
@@ -67,9 +68,9 @@ export const useUpdateAgentMutation = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: AgentUpdateDto }) => updateAgent(id, body),
     onSuccess: (_data, variables) => {
-      // 상세/목록 캐시 무효화
       queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+      toast.success("에이전트가 수정되었습니다.");
     },
   });
 };
@@ -81,8 +82,8 @@ export const useDeleteAgentMutation = () => {
   return useMutation({
     mutationFn: (id: string) => deleteAgent(id),
     onSuccess: () => {
-      // 삭제 후 목록 관련 캐시 무효화
       queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+      toast.success("에이전트가 삭제되었습니다.");
     },
   });
 };

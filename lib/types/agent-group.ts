@@ -35,6 +35,7 @@ export interface AgentGroup {
   strategy: AgentGroupStrategy;
   sharedContext?: string | null;
   synthesizePrompt?: string | null;
+  outputPrompt?: string | null;
   createdAt?: string;
   updatedAt?: string;
   members?: AgentGroupMember[];
@@ -52,6 +53,7 @@ export interface AgentGroupCreateDto {
   sharedContext?: string;
   synthesizePrompt?: string;
   members: AgentGroupMemberDto[];
+  outputPrompt?: string;
 }
 
 export type AgentGroupUpdateDto = Partial<Omit<AgentGroupCreateDto, "members">> & {

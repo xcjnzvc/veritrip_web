@@ -21,6 +21,12 @@ export type AdminModalDialogProps = {
   withBackdrop?: boolean;
   /** 카드(`modalCard`)에 추가 클래스 */
   className?: string;
+  /** 본문 영역 스크롤 활성화 여부 */
+  contentScrollable?: boolean;
+  /** 본문 영역 최대 높이 클래스 (예: max-h-[70vh]) */
+  contentMaxHeightClassName?: string;
+  /** 본문 영역 추가 클래스 */
+  contentClassName?: string;
 };
 
 /**
@@ -33,6 +39,9 @@ export default function AdminModalDialog({
   onClose,
   withBackdrop = true,
   className,
+  contentScrollable = false,
+  contentMaxHeightClassName = "max-h-[70vh]",
+  contentClassName,
 }: AdminModalDialogProps) {
   useEffect(() => {
     if (!onClose) return;
@@ -67,7 +76,15 @@ export default function AdminModalDialog({
           </button>
         ) : null}
       </div>
-      {children}
+      <div
+        className={cn(
+          contentScrollable && contentMaxHeightClassName,
+          contentScrollable && "overflow-y-auto pr-1",
+          contentClassName,
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 

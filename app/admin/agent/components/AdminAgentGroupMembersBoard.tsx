@@ -6,6 +6,7 @@ import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { Bot, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import AdminFailUi from "../../components/AdminFailUi";
 import AdminInlineLoading from "../../components/AdminInlineLoading";
 
 interface AdminAgentGroupMembersBoardProps {
@@ -58,7 +59,7 @@ export default function AdminAgentGroupMembersBoard({
           ? ((error as { message?: string }).message ?? "알 수 없는 오류")
           : "알 수 없는 오류";
 
-    return <div className="text-sm text-red-400">그룹 조회에 실패했습니다: {message}</div>;
+    return <AdminFailUi title="그룹 조회에 실패했습니다" message={message} />;
   }
 
   if (!isGroupSelected) {

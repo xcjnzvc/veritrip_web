@@ -26,7 +26,7 @@ export default function AgentPageClient({
           subtitle="에이전트 생성 전에 그룹을 먼저 만들고, 멤버 에이전트를 구성하세요."
         />
 
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="grid max-w-[1600px] gap-4 lg:grid-cols-3">
           <AdminAgentGroupListCard
             initialGroupList={initialGroupList}
             initialGroupListUpdatedAt={initialGroupListUpdatedAt}

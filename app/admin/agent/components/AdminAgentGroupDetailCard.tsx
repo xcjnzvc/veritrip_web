@@ -11,13 +11,13 @@ import { agentKeys } from "@/lib/queryKeys/agent";
 import { agentGroupKeys } from "@/lib/queryKeys/agent-group";
 import type { AgentGroupMember } from "@/lib/types/agent-group";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, Pencil, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import AdminCardSectionHeader from "../../components/AdminCardSectionHeader";
 import AdminModalDialog from "../../components/AdminModalDialog";
 import { adminTw } from "../../components/styles";
 import AdminAgentCreateForm from "./AdminAgentCreateDialog";
-import AdminAgentGroupCreateForm from "./AdminAgentGroupCreateForm";
+import AdminAgentGroupCreateDialog from "./AdminAgentGroupCreateDialog";
 import AdminAgentGroupAddMemberDialog from "./AdminAgentGroupAddMemberDialog";
 import AdminAgentGroupMemberAssignRoleDialog from "./AdminAgentGroupMemberAssignRoleDialog";
 import AdminAgentGroupMembersBoard from "./AdminAgentGroupMembersBoard";
@@ -43,6 +43,7 @@ export default function AdminAgentGroupDetailCard({
   const [groupEditOpen, setGroupEditOpen] = useState(false);
   const [agentCreateOpen, setAgentCreateOpen] = useState(false);
   const [editAgentId, setEditAgentId] = useState<string | null>(null);
+  const [isOutputPromptOpen, setIsOutputPromptOpen] = useState(false);
   const [assignRoleMember, setAssignRoleMember] = useState<AgentGroupMember | null>(null);
   const [runAgentMember, setRunAgentMember] = useState<AgentGroupMember | null>(null);
 
@@ -180,6 +181,32 @@ export default function AdminAgentGroupDetailCard({
           />
 
           <div className="p-4">
+            {group?.outputPrompt ? (
+              <div className="bg-muted/30 mb-4 rounded-md border p-3">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between text-left"
+                  onClick={() => setIsOutputPromptOpen((prev) => !prev)}
+                  aria-expanded={isOutputPromptOpen}
+                >
+                  <p className="text-xs font-semibold">최종 응답 형식</p>
+                  <ChevronDown
+                    className={`size-4 transition-transform ${isOutputPromptOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <div
+                  className={`grid transition-all duration-300 ease-out ${
+                    isOutputPromptOpen ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+                      {group.outputPrompt}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
             <AdminAgentGroupMembersBoard
               membersSorted={membersSorted}
               isLoading={isGroupDetailLoading}
@@ -219,8 +246,10 @@ export default function AdminAgentGroupDetailCard({
           title="에이전트 그룹 수정"
           onClose={() => setGroupEditOpen(false)}
           subtitle="그룹 메타 정보를 수정합니다."
+          contentScrollable
+          contentMaxHeightClassName="max-h-[68vh]"
         >
-          <AdminAgentGroupCreateForm
+          <AdminAgentGroupCreateDialog
             editGroup={group}
             onSuccess={() => {
               setGroupEditOpen(false);

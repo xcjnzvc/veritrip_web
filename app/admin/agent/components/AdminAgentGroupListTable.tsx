@@ -3,6 +3,7 @@
 import type { AgentGroup } from "@/lib/types/agent-group";
 import { Bot } from "lucide-react";
 import AdminDataTable, { type AdminTableColumn } from "../../components/AdminDataTable";
+import AdminFailUi from "../../components/AdminFailUi";
 import AdminInlineLoading from "../../components/AdminInlineLoading";
 import { adminTw } from "../../components/styles";
 
@@ -13,6 +14,7 @@ interface AdminAgentGroupListTableProps {
   error: unknown;
   selectedGroupId: string | null;
   onSelectGroupId: (id: string) => void;
+  onOpenEditGroup: (group: AgentGroup) => void;
 }
 
 export default function AdminAgentGroupListTable({
@@ -22,6 +24,7 @@ export default function AdminAgentGroupListTable({
   error,
   selectedGroupId,
   onSelectGroupId,
+  onOpenEditGroup,
 }: AdminAgentGroupListTableProps) {
   if (isLoading) {
     return <AdminInlineLoading label="그룹 목록을 불러오는 중…" />;
@@ -38,9 +41,7 @@ export default function AdminAgentGroupListTable({
           ? ((error as { message?: string }).message ?? "알 수 없는 오류")
           : "알 수 없는 오류";
 
-    return (
-      <div className="px-4 py-6 text-sm text-red-400">그룹 목록 조회에 실패했습니다: {message}</div>
-    );
+    return <AdminFailUi title="그룹 목록 조회에 실패했습니다" message={message} />;
   }
 
   const columns: AdminTableColumn[] = [
@@ -54,7 +55,10 @@ export default function AdminAgentGroupListTable({
       columns={columns}
       rows={groups}
       getRowKey={(group) => group.id}
-      onRowClick={(group) => onSelectGroupId(group.id)}
+      onRowClick={(group) => {
+        onSelectGroupId(group.id);
+        onOpenEditGroup(group);
+      }}
       rowClassName={(group) => (selectedGroupId === group.id ? "bg-muted/30" : undefined)}
       emptyContent={
         <div className="flex flex-col items-center gap-2">

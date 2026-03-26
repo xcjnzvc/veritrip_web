@@ -14,6 +14,7 @@ import type {
   AgentGroupListQuery,
   AgentGroupUpdateDto,
 } from "../types/agent-group";
+import { toast } from "../toast";
 
 export const useAgentGroupListQuery = (
   params: AgentGroupListQuery,
@@ -50,6 +51,7 @@ export const useCreateAgentGroupMutation = () => {
     mutationFn: (body: AgentGroupCreateDto) => createAgentGroup(body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+      toast.success("에이전트 그룹이 생성되었습니다.");
     },
   });
 };
@@ -63,6 +65,7 @@ export const useUpdateAgentGroupMutation = () => {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.details() });
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.detail(variables.id) });
+      toast.success("에이전트 그룹이 수정되었습니다.");
     },
   });
 };
@@ -74,6 +77,7 @@ export const useDeleteAgentGroupMutation = () => {
     mutationFn: (id: string) => deleteAgentGroup(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: agentGroupKeys.lists() });
+      toast.success("에이전트 그룹이 삭제되었습니다.");
     },
   });
 };

@@ -8,13 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCreateAgentGroupMutation, useUpdateAgentGroupMutation } from "@/lib/queries/agent-group";
+import {
+  useCreateAgentGroupMutation,
+  useUpdateAgentGroupMutation,
+} from "@/lib/queries/agent-group";
 import type { AgentGroup, AgentGroupCreateDto, AgentGroupStrategy } from "@/lib/types/agent-group";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import AdminInput from "../../components/AdminInput";
 import AdminTextarea from "../../components/AdminTextarea";
 
-interface AdminAgentGroupCreateFormProps {
+interface AdminAgentGroupCreateDialogProps {
   onSuccess: () => void;
   editGroup?: AgentGroup | null;
 }
@@ -27,6 +30,7 @@ const EMPTY_FORM_VALUES: AgentGroupFormValues = {
   strategy: "SEQUENTIAL",
   sharedContext: "",
   synthesizePrompt: "",
+  outputPrompt: "",
 };
 
 const toFormValues = (group?: AgentGroup | null): AgentGroupFormValues => {
@@ -38,13 +42,14 @@ const toFormValues = (group?: AgentGroup | null): AgentGroupFormValues => {
     strategy: group.strategy,
     sharedContext: group.sharedContext ?? "",
     synthesizePrompt: group.synthesizePrompt ?? "",
+    outputPrompt: group.outputPrompt ?? "",
   };
 };
 
-export default function AdminAgentGroupCreateForm({
+export default function AdminAgentGroupCreateDialog({
   onSuccess,
   editGroup,
-}: AdminAgentGroupCreateFormProps) {
+}: AdminAgentGroupCreateDialogProps) {
   const createMutation = useCreateAgentGroupMutation();
   const updateMutation = useUpdateAgentGroupMutation();
   const isEditMode = Boolean(editGroup?.id);
@@ -119,7 +124,7 @@ export default function AdminAgentGroupCreateForm({
         <Select
           value={form.strategy}
           onValueChange={(value) =>
-            setForm((prev: AgentGroupCreateDto) => ({
+            setForm((prev: AgentGroupFormValues) => ({
               ...prev,
               strategy: value as AgentGroupStrategy,
             }))
@@ -152,9 +157,22 @@ export default function AdminAgentGroupCreateForm({
         onChange={handleChange("synthesizePrompt")}
       />
 
+      <AdminTextarea
+        label="최종 응답 형식"
+        placeholder="선택: 최종 응답 형식"
+        value={form.outputPrompt ?? ""}
+        onChange={handleChange("outputPrompt")}
+      />
+
       <div className="flex justify-end gap-2 pt-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (isEditMode ? "수정 중..." : "생성 중...") : isEditMode ? "그룹 수정" : "그룹 생성"}
+          {isSubmitting
+            ? isEditMode
+              ? "수정 중..."
+              : "생성 중..."
+            : isEditMode
+              ? "그룹 수정"
+              : "그룹 생성"}
         </Button>
       </div>
     </form>

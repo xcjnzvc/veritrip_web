@@ -1,6 +1,7 @@
 "use client";
 
 import type { AgentGroupListResponse } from "@/lib/api/agent-group";
+import type { AgentGroup } from "@/lib/types/agent-group";
 import { AGENT_GROUP_LIST_TAKE } from "@/lib/constants/agentGroupList";
 import { useAgentGroupListQuery } from "@/lib/queries/agent-group";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import AdminModalDialog from "../../components/AdminModalDialog";
 import AdminPagination from "../../components/AdminPagination";
 import { adminTw } from "../../components/styles";
 import { useAgentGroupPage } from "./AgentGroupPageContext";
-import AdminAgentGroupCreateForm from "./AdminAgentGroupCreateForm";
+import AdminAgentGroupCreateDialog from "./AdminAgentGroupCreateDialog";
 import AdminAgentGroupListTable from "./AdminAgentGroupListTable";
 
 export type AdminAgentGroupListCardProps = {
@@ -28,6 +29,7 @@ export default function AdminAgentGroupListCard({
   const { selectedGroupId, setSelectedGroupId } = useAgentGroupPage();
   const [groupPage, setGroupPage] = useState(initialGroupPage);
   const [isGroupCreateOpen, setIsGroupCreateOpen] = useState(false);
+  const [editGroup, setEditGroup] = useState<AgentGroup | null>(null);
 
   const useServerSeed =
     initialGroupList != null && initialGroupListUpdatedAt != null && groupPage === initialGroupPage;
@@ -68,6 +70,7 @@ export default function AdminAgentGroupListCard({
           error={error}
           selectedGroupId={selectedGroupId}
           onSelectGroupId={(id) => setSelectedGroupId(id)}
+          onOpenEditGroup={(group) => setEditGroup(group)}
         />
 
         {meta ? (
@@ -81,11 +84,33 @@ export default function AdminAgentGroupListCard({
       </div>
 
       {isGroupCreateOpen ? (
-        <AdminModalDialog title="에이전트 그룹 생성" onClose={() => setIsGroupCreateOpen(false)}>
-          <AdminAgentGroupCreateForm
+        <AdminModalDialog
+          title="에이전트 그룹 생성"
+          onClose={() => setIsGroupCreateOpen(false)}
+          contentScrollable
+          contentMaxHeightClassName="max-h-[68vh]"
+        >
+          <AdminAgentGroupCreateDialog
             onSuccess={() => {
               setIsGroupCreateOpen(false);
               setSelectedGroupId(null);
+            }}
+          />
+        </AdminModalDialog>
+      ) : null}
+
+      {editGroup ? (
+        <AdminModalDialog
+          title="에이전트 그룹 수정"
+          subtitle="그룹 메타 정보를 수정합니다."
+          onClose={() => setEditGroup(null)}
+          contentScrollable
+          contentMaxHeightClassName="max-h-[68vh]"
+        >
+          <AdminAgentGroupCreateDialog
+            editGroup={editGroup}
+            onSuccess={() => {
+              setEditGroup(null);
             }}
           />
         </AdminModalDialog>

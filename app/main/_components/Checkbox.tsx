@@ -6,9 +6,15 @@ interface CheckboxProps {
 
 export default function Checkbox({ label, checked, onChange }: CheckboxProps) {
   return (
-    <div className="group flex cursor-pointer items-center gap-[8px]" onClick={onChange}>
+    <div
+      className="flex items-center gap-[8px] cursor-pointer group"
+      onClick={onChange}
+    >
       <div
-        className={`flex h-[16px] w-[16px] items-center justify-center rounded-[4px] border transition-all ${checked ? "border-[#5E0E8C] bg-[#5E0E8C]" : "border-[#ddd] bg-white"} `}
+        className={`
+            w-[16px] h-[16px] rounded-[4px] border flex items-center justify-center transition-all
+            ${checked ? "bg-[#5E0E8C] border-[#5E0E8C]" : "bg-white border-[#ddd]"}
+          `}
       >
         {checked && (
           <svg
@@ -28,7 +34,9 @@ export default function Checkbox({ label, checked, onChange }: CheckboxProps) {
           </svg>
         )}
       </div>
-      <p className="text-[14px] text-[#999] select-none group-hover:text-[#666]">{label}</p>
+      <p className="text-[14px] text-[#999] select-none group-hover:text-[#666]">
+        {label}
+      </p>
     </div>
   );
 }

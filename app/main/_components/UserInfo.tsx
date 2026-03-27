@@ -24,15 +24,15 @@ export default function UserInfoBox({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="absolute top-full right-0 z-50 flex w-max min-w-[220px] flex-col gap-[20px] overflow-hidden rounded-[12px] border border-[#ddd] bg-[#f9f9f9] px-[10px] py-[20px] shadow-lg"
+      className="flex flex-col gap-[20px] absolute right-0 top-full min-w-[220px] w-max py-[20px] px-[10px] bg-[#f9f9f9] border border-[#ddd] rounded-[12px] shadow-lg z-50 overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       {/* 상단 프로필 섹션 */}
       <div className="flex flex-col gap-[8px]">
-        <span className="text-vt-primary self-start rounded-full bg-[#F0EAF5] px-[10px] py-[4px] text-[12px] font-bold">
+        <span className="self-start bg-[#F0EAF5] text-vt-primary text-[12px] font-bold px-[10px] py-[4px] rounded-full">
           무료
         </span>
-        <p className="text-vt-gray-900 text-[14px] font-normal break-all">
+        <p className="text-[14px] text-vt-gray-900 font-normal break-all">
           {localPart}
           {domainPart && (
             <>

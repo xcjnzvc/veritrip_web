@@ -28,6 +28,7 @@ import {
   AGENT_FORM_ROWS,
   GROUP_SELECT_NONE,
   type AgentCreateTextKey,
+  type AgentCreateBooleanKey,
   type AgentFormRow,
   type TextFieldRow,
   getInitialAgentForm,
@@ -48,6 +49,8 @@ function detailToForm(d: AgentDetail): AgentCreateDto {
     provider,
     modelId: d.modelId ?? "",
     groupId: undefined,
+    useJson: d.useJson ?? false,
+    useSearch: d.useSearch ?? false,
   };
 }
 
@@ -73,6 +76,11 @@ function AgentFormFields({
   const handleChange =
     (field: AgentCreateTextKey) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    };
+
+  const handleBooleanChange =
+    (field: AgentCreateBooleanKey) => (e: ChangeEvent<HTMLInputElement>) => {
+      setForm((prev) => ({ ...prev, [field]: e.target.checked }));
     };
 
   const renderTextField = (field: TextFieldRow) => {
@@ -136,6 +144,27 @@ function AgentFormFields({
   };
 
   const renderRow = (row: AgentFormRow, index: number) => {
+    if (row.kind === "boolean") {
+      const id = `agent-form-${row.key}-${index}`;
+
+      return (
+        <div key={id} className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <label htmlFor={id} className="block text-sm font-semibold leading-none">
+              {row.label}
+            </label>
+            {row.description ? <p className="text-muted-foreground text-xs">{row.description}</p> : null}
+          </div>
+          <input
+            id={id}
+            type="checkbox"
+            checked={form[row.key]}
+            onChange={handleBooleanChange(row.key)}
+            className="border-input size-4 rounded border"
+          />
+        </div>
+      );
+    }
     if (row.kind === "provider") {
       return (
         <div key={`provider-${index}`} className="flex flex-col gap-2">
@@ -249,6 +278,8 @@ function AdminAgentEditFormBody({
       outputPrompt: form.outputPrompt,
       provider: form.provider,
       modelId: form.modelId,
+      useJson: form.useJson,
+      useSearch: form.useSearch,
     };
 
     updateMutation.mutate(

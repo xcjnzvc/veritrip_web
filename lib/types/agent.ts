@@ -18,6 +18,8 @@ export interface AgentDetail extends Agent {
   taskPrompt?: string | null;
   outputPrompt?: string | null;
   groupId?: string | null;
+  useJson?: boolean;
+  useSearch?: boolean;
 }
 
 export type AgentDetailResponse = ApiResponseWithData<AgentDetail>;
@@ -41,13 +43,23 @@ export interface AgentCreateDto {
   provider: "XAI" | "GEMINI";
   modelId: string;
   groupId?: string;
+  useJson: boolean;
+  useSearch: boolean;
 }
 
 // 수정은 일부 필드만 선택적으로 들어갈 수 있도록 부분 타입으로 정의
 export type AgentUpdateDto = Partial<
   Pick<
     AgentCreateDto,
-    "name" | "description" | "rolePrompt" | "taskPrompt" | "outputPrompt" | "provider" | "modelId"
+    | "name"
+    | "description"
+    | "rolePrompt"
+    | "taskPrompt"
+    | "outputPrompt"
+    | "provider"
+    | "modelId"
+    | "useJson"
+    | "useSearch"
   >
 >;
 

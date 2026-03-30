@@ -6,6 +6,8 @@ export type AgentCreateTextKey = keyof Pick<
   "name" | "description" | "rolePrompt" | "taskPrompt" | "outputPrompt" | "modelId"
 >;
 
+export type AgentCreateBooleanKey = keyof Pick<AgentCreateDto, "useJson" | "useSearch">;
+
 export type TextFieldRow = {
   kind: "text";
   key: AgentCreateTextKey;
@@ -15,10 +17,17 @@ export type TextFieldRow = {
   required?: boolean;
 };
 
+export type BooleanFieldRow = {
+  kind: "boolean";
+  key: AgentCreateBooleanKey;
+  label: string;
+  description?: string;
+};
+
 export type ProviderRow = { kind: "provider" };
 export type GroupSelectRow = { kind: "groupSelect" };
 
-export type AgentFormRow = TextFieldRow | ProviderRow | GroupSelectRow;
+export type AgentFormRow = TextFieldRow | BooleanFieldRow | ProviderRow | GroupSelectRow;
 
 export const GROUP_SELECT_NONE = "__none__";
 
@@ -57,6 +66,18 @@ export const AGENT_FORM_ROWS: AgentFormRow[] = [
     required: true,
   },
   {
+    kind: "boolean",
+    key: "useJson",
+    label: "JSON 사용",
+    description: "출력 포맷을 JSON 기반으로 생성하도록 설정합니다.",
+  },
+  {
+    kind: "boolean",
+    key: "useSearch",
+    label: "웹 검색 사용",
+    description: "필요 시 웹 검색을 활용해 결과를 보강합니다.",
+  },
+  {
     kind: "text",
     key: "outputPrompt",
     variant: "textarea",
@@ -82,6 +103,8 @@ export function getInitialAgentForm(defaultGroupId?: string | null): AgentCreate
     description: "",
     rolePrompt: "",
     taskPrompt: "",
+    useJson: false,
+    useSearch: false,
     outputPrompt: "",
     provider: "GEMINI",
     modelId: "gemini-1.5-flash",

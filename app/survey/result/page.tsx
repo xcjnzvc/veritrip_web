@@ -1,104 +1,3 @@
-// "use client";
-
-// import DayTab from "./_components/DayTab";
-// import { sampleItinerary } from "../mock/itinerary";
-// import { useState } from "react";
-// import DailySummary from "./_components/DailySummary";
-// import ItineraryItem from "./_components/ItineraryItem";
-// import Image from "next/image";
-// import Button from "@/app/main/_components/Button";
-// import dynamic from "next/dynamic";
-
-// // Leaflet은 브라우저에서만 동작하므로 dynamic import 필수
-// const ItineraryMap = dynamic(() => import("./_components/ItineraryMap"), {
-//   ssr: false,
-//   loading: () => (
-//     <div className="flex h-full items-center justify-center text-[#999]">지도 로딩 중...</div>
-//   ),
-// });
-
-// export default function SurveyResult() {
-//   const [activeDay, setActiveDay] = useState(1);
-
-//   const currentDayData = sampleItinerary.find((d) => d.day === activeDay);
-//   const currentSchedules = currentDayData?.schedules ?? [];
-
-//   return (
-//     <div className="flex h-screen">
-//       {/* 왼쪽: 일정 리스트 */}
-//       <div className="relative w-1/2 overflow-y-auto px-[40px] pt-[50px]">
-//         <Image
-//           src="/survey/share.svg"
-//           alt="share"
-//           width={24}
-//           height={24}
-//           className="absolute top-0 right-[20px] cursor-pointer"
-//         />
-//         <div className="mx-auto flex max-w-[600px] flex-col items-center gap-[10px]">
-//           <div className="relative mb-[14px] h-[140px] w-[140px] overflow-hidden rounded-full bg-[#ddd]">
-//             <Image src="/survey/japen.png" alt="japen" fill className="object-cover" />
-//           </div>
-
-//           <span className="text-[16px] font-medium text-[#999]">일본</span>
-
-//           <div className="text-center text-[32px] leading-snug text-[#666]">
-//             <div>
-//               지역은 <span className="font-semibold text-[#222222]">도쿄</span>,
-//             </div>
-//             <div>
-//               일정은 <span className="font-semibold text-[#222222]">5박 6일</span>입니다.
-//             </div>
-//           </div>
-
-//           <div className="w-full">
-//             <div className="flex gap-[16px]">
-//               {sampleItinerary.map((i) => (
-//                 <DayTab
-//                   key={i.day}
-//                   day={i.day}
-//                   isActive={activeDay === i.day}
-//                   onClick={() => setActiveDay(i.day)}
-//                 />
-//               ))}
-//             </div>
-//           </div>
-
-//           <DailySummary toure="3" />
-
-//           {currentSchedules.map((schedule, idx) => (
-//             <ItineraryItem
-//               key={schedule.id}
-//               imageUrl={schedule.image}
-//               title={schedule.name}
-//               description={schedule.subcategory}
-//               iconUrl={`/survey/${schedule.icon}`}
-//               category={schedule.category}
-//               index={idx}
-//               isLast={idx === currentSchedules.length - 1}
-//             />
-//           ))}
-
-//           <div className="mt-[40px] mb-[40px] flex w-full flex-col gap-[10px] text-center">
-//             <span className="text-[18px] font-semibold">이 일정이 마음에 드시나요?</span>
-//             <span className="text-[16px] text-[#666]">
-//               로그인 후 내 일정으로 저장하면 언제든 확인하고 편집할 수 있어요.
-//             </span>
-//             <div className="mt-[10px] flex gap-[20px]">
-//               <Button text="내 일정으로 저장" color="메인" />
-//               <Button text="다시 추천받기" color="회색" />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* 오른쪽: 지도 */}
-//       <div className="sticky top-0 h-screen w-1/2">
-//         <ItineraryMap schedules={currentSchedules} />
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import DayTab from "./_components/DayTab";
@@ -114,7 +13,9 @@ import dynamic from "next/dynamic";
 const ItineraryMap = dynamic(() => import("./_components/ItineraryMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center text-[#999]">지도 로딩 중...</div>
+    <div className="flex h-full items-center justify-center text-[#999]">
+      지도 로딩 중...
+    </div>
   ),
 });
 
@@ -162,7 +63,12 @@ export default function SurveyResult() {
 
         <div className="mx-auto flex max-w-[600px] flex-col items-center gap-[10px]">
           <div className="relative mb-[14px] h-[140px] w-[140px] overflow-hidden rounded-full bg-[#ddd]">
-            <Image src="/survey/japen.png" alt="japen" fill className="object-cover" />
+            <Image
+              src="/survey/japen.png"
+              alt="japen"
+              fill
+              className="object-cover"
+            />
           </div>
 
           <span className="text-[16px] font-medium text-[#999]">일본</span>
@@ -172,7 +78,9 @@ export default function SurveyResult() {
               지역은 <span className="font-semibold text-[#222222]">도쿄</span>,
             </div>
             <div>
-              일정은 <span className="font-semibold text-[#222222]">5박 6일</span>입니다.
+              일정은{" "}
+              <span className="font-semibold text-[#222222]">5박 6일</span>
+              입니다.
             </div>
           </div>
           <div className="flex w-full flex-col gap-[20px]">
@@ -211,7 +119,9 @@ export default function SurveyResult() {
           </div>
 
           <div className="mt-[40px] mb-[40px] flex w-full flex-col gap-[10px] text-center">
-            <span className="text-[18px] font-semibold">이 일정이 마음에 드시나요?</span>
+            <span className="text-[18px] font-semibold">
+              이 일정이 마음에 드시나요?
+            </span>
             <span className="text-[16px] text-[#666]">
               로그인 후 내 일정으로 저장하면 언제든 확인하고 편집할 수 있어요.
             </span>

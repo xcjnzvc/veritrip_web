@@ -32,7 +32,7 @@ export default function AdminAgentRunDialog({
 }: AdminAgentRunDialogProps) {
   const runMutation = useRunAgentMutation();
   const [prompt, setPrompt] = useState("");
-  const [useGoogleSearch, setUseGoogleSearch] = useState(false);
+  // const [useGoogleSearch, setUseGoogleSearch] = useState(false);
   const [response, setResponse] = useState<AgentRunResponse | null>(null);
   const [clientError, setClientError] = useState<string | null>(null);
 
@@ -50,7 +50,7 @@ export default function AdminAgentRunDialog({
         id: agentId,
         body: {
           prompt: trimmed,
-          useGoogleSearch: useGoogleSearch || undefined,
+          // useGoogleSearch: useGoogleSearch || undefined,
         },
       },
       {
@@ -85,7 +85,7 @@ export default function AdminAgentRunDialog({
           required
         />
 
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <input
             id="agent-run-google-search"
             type="checkbox"
@@ -96,7 +96,7 @@ export default function AdminAgentRunDialog({
           <Label htmlFor="agent-run-google-search" className="text-sm font-normal">
             Google Search Grounding 사용
           </Label>
-        </div>
+        </div> */}
 
         {clientError ? (
           <p className="text-destructive text-sm" role="alert">
@@ -105,7 +105,12 @@ export default function AdminAgentRunDialog({
         ) : null}
 
         <div className="flex shrink-0 justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose} disabled={runMutation.isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={runMutation.isPending}
+          >
             닫기
           </Button>
           <Button type="submit" variant="primary" disabled={runMutation.isPending}>
@@ -137,7 +142,7 @@ export default function AdminAgentRunDialog({
                 <>
                   <div>
                     <p className="text-muted-foreground mb-1 text-xs font-medium">text</p>
-                    <pre className="bg-muted max-h-48 overflow-auto whitespace-pre-wrap rounded-md p-3 text-xs">
+                    <pre className="bg-muted max-h-48 overflow-auto rounded-md p-3 text-xs whitespace-pre-wrap">
                       {resultData.text}
                     </pre>
                   </div>

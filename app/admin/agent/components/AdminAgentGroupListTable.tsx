@@ -14,7 +14,6 @@ interface AdminAgentGroupListTableProps {
   error: unknown;
   selectedGroupId: string | null;
   onSelectGroupId: (id: string) => void;
-  onOpenEditGroup: (group: AgentGroup) => void;
 }
 
 export default function AdminAgentGroupListTable({
@@ -24,7 +23,6 @@ export default function AdminAgentGroupListTable({
   error,
   selectedGroupId,
   onSelectGroupId,
-  onOpenEditGroup,
 }: AdminAgentGroupListTableProps) {
   if (isLoading) {
     return <AdminInlineLoading label="그룹 목록을 불러오는 중…" />;
@@ -57,7 +55,6 @@ export default function AdminAgentGroupListTable({
       getRowKey={(group) => group.id}
       onRowClick={(group) => {
         onSelectGroupId(group.id);
-        onOpenEditGroup(group);
       }}
       rowClassName={(group) => (selectedGroupId === group.id ? "bg-muted/30" : undefined)}
       emptyContent={

@@ -85,14 +85,13 @@ export default function Survey() {
 
       // URL 쿼리스트링에서 값 꺼내서 백엔드 형식으로 변환
       const payload = {
-        typeId: 1,
         answers: [
-          { answer: params.get("destination"), orderNumber: 1 },
-          { answer: params.get("duration"), orderNumber: 2 },
-          { answer: params.get("companion"), orderNumber: 3 },
-          { answer: params.get("theme"), orderNumber: 4 },
-          { answer: params.get("dislike"), orderNumber: 5 },
-          { answer: params.get("travelStyle"), orderNumber: 6 },
+          { key: "destination", answer: params.get("destination"), orderNumber: 1 },
+          { key: "duration", answer: params.get("duration"), orderNumber: 2 },
+          { key: "companion", answer: params.get("companion"), orderNumber: 3 },
+          { key: "theme", answer: params.get("theme"), orderNumber: 4 },
+          { key: "dislike", answer: params.get("dislike"), orderNumber: 5 },
+          { key: "travelStyle", answer: params.get("travelStyle"), orderNumber: 6 },
         ],
       };
 

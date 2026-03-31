@@ -70,7 +70,6 @@ export default function AdminAgentGroupListCard({
           error={error}
           selectedGroupId={selectedGroupId}
           onSelectGroupId={(id) => setSelectedGroupId(id)}
-          onOpenEditGroup={(group) => setEditGroup(group)}
         />
 
         {meta ? (

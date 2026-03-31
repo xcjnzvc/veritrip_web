@@ -13,8 +13,8 @@ export const getSurvey = async () => {
 };
 
 export const submitSurvey = async (payload: {
-  typeId: number;
   answers: {
+    key: string;
     answer: string | null;
     orderNumber: number;
   }[];

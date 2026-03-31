@@ -16,12 +16,12 @@ import { useMemo, useState } from "react";
 import AdminCardSectionHeader from "../../components/AdminCardSectionHeader";
 import AdminModalDialog from "../../components/AdminModalDialog";
 import { adminTw } from "../../components/styles";
-import AdminAgentCreateForm from "./AdminAgentCreateDialog";
-import AdminAgentGroupCreateDialog from "./AdminAgentGroupCreateDialog";
-import AdminAgentGroupAddMemberDialog from "./AdminAgentGroupAddMemberDialog";
-import AdminAgentGroupMemberAssignRoleDialog from "./AdminAgentGroupMemberAssignRoleDialog";
+import AdminAgentCreateForm from "../dialogs/AdminAgentCreateDialog";
+import AdminAgentGroupCreateDialog from "../dialogs/AdminAgentGroupCreateDialog";
+import AdminAgentGroupAddMemberDialog from "../dialogs/AdminAgentGroupAddMemberDialog";
+import AdminAgentGroupMemberAssignRoleDialog from "../dialogs/AdminAgentGroupMemberAssignRoleDialog";
 import AdminAgentGroupMembersBoard from "./AdminAgentGroupMembersBoard";
-import AdminAgentRunDialog from "./AdminAgentRunDialog";
+import AdminAgentRunDialog from "../dialogs/AdminAgentRunDialog";
 import { useAgentGroupPage } from "./AgentGroupPageContext";
 import {
   applyOptimisticRemoveGroupMember,

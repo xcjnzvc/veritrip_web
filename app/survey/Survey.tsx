@@ -95,7 +95,8 @@ export default function Survey() {
         ],
       };
 
-      console.log("🚀 백엔드로 보낼 최종 데이터:", payload);
+      console.log("[Survey] 최종 payload:", payload);
+      console.log("[Survey] 최종 payload(JSON):", JSON.stringify(payload, null, 2));
       // await submitSurvey(payload); // ← 여기서 API 호출
       router.push("/survey/result"); // ← 결과 페이지로 이동
     } else {

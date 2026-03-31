@@ -32,7 +32,7 @@ import {
   type AgentFormRow,
   type TextFieldRow,
   getInitialAgentForm,
-} from "./agentFormConfig";
+} from "../components/agentFormConfig";
 
 const AGENT_MODAL_MAX_HEIGHT_CLASS = "max-h-[85vh] overflow-hidden";
 const AGENT_MODAL_BODY_SCROLL_CLASS = "max-h-[calc(85vh-120px)] overflow-y-auto pr-1 pb-4";

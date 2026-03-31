@@ -12,7 +12,7 @@ import AdminModalDialog from "../../components/AdminModalDialog";
 import AdminPagination from "../../components/AdminPagination";
 import { adminTw } from "../../components/styles";
 import { useAgentGroupPage } from "./AgentGroupPageContext";
-import AdminAgentGroupCreateDialog from "./AdminAgentGroupCreateDialog";
+import AdminAgentGroupCreateDialog from "../dialogs/AdminAgentGroupCreateDialog";
 import AdminAgentGroupListTable from "./AdminAgentGroupListTable";
 
 export type AdminAgentGroupListCardProps = {

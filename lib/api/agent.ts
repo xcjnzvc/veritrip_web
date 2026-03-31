@@ -10,6 +10,9 @@ import {
 } from "../types/agent";
 import { ApiResponse } from "../types/api";
 
+/** 에이전트 실행은 LLM 등으로 응답이 길 수 있어 전역 timeout(20s)보다 길게 둠. 0이면 무제한(axios 기본 동작) */
+const AGENT_RUN_TIMEOUT_MS = 600_000;
+
 export type { AgentDetailResponse } from "../types/agent";
 export type {
   AgentCreateDto,
@@ -53,6 +56,10 @@ export const deleteAgent = async (id: string): Promise<ApiResponse> => {
 
 // 에이전트 실행 (POST /agents/:id/run)
 export const runAgent = async (id: string, body: AgentRunDto): Promise<AgentRunResponse> => {
-  const response = await axiosInstance.post<AgentRunResponse>(`/mgmt/agents/${id}/run`, body);
+  const response = await axiosInstance.post<AgentRunResponse>(
+    `/mgmt/agents/${id}/run`,
+    body,
+    { timeout: AGENT_RUN_TIMEOUT_MS },
+  );
   return response.data;
 };
